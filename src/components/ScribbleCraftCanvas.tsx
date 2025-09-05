@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useRef, forwardRef, useImperativeHandle } from "react";
@@ -5,10 +6,11 @@ import { useEffect, useRef, forwardRef, useImperativeHandle } from "react";
 interface ScribbleCraftCanvasProps {
   text: string;
   fontFamily: string;
+  paperType: string;
 }
 
 const ScribbleCraftCanvas = forwardRef<{ downloadImage: () => void }, ScribbleCraftCanvasProps>(
-  ({ text, fontFamily }, ref) => {
+  ({ text, fontFamily, paperType }, ref) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const FONT_SIZE = 42;
@@ -41,7 +43,6 @@ const ScribbleCraftCanvas = forwardRef<{ downloadImage: () => void }, ScribbleCr
         const { width } = container.getBoundingClientRect();
         const dpr = window.devicePixelRatio || 1;
         const canvasWidth = width;
-        // Make the canvas taller
         const canvasHeight = Math.max(500, width * 1.414); 
 
         canvas.width = canvasWidth * dpr;
@@ -50,16 +51,21 @@ const ScribbleCraftCanvas = forwardRef<{ downloadImage: () => void }, ScribbleCr
         canvas.style.height = `${canvasHeight}px`;
         ctx.scale(dpr, dpr);
 
-        // Draw a crumpled paper background
-        ctx.fillStyle = "#fdfdfc";
-        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-        
-        const grd = ctx.createLinearGradient(0, 0, 0, canvasHeight);
-        grd.addColorStop(0, "rgba(0,0,0,0.05)");
-        grd.addColorStop(0.5, "rgba(0,0,0,0)");
-        grd.addColorStop(1, "rgba(0,0,0,0.05)");
-        ctx.fillStyle = grd;
-        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+        // Paper styles
+        switch (paperType) {
+          case 'notebook-paper':
+            drawNotebookPaper(ctx, canvasWidth, canvasHeight);
+            break;
+          case 'diary-page':
+            drawDiaryPage(ctx, canvasWidth, canvasHeight);
+            break;
+          case 'old-paper':
+            drawOldPaper(ctx, canvasWidth, canvasHeight);
+            break;
+          default: // white-paper
+            drawWhitePaper(ctx, canvasWidth, canvasHeight);
+            break;
+        }
 
 
         ctx.fillStyle = "#1a1a1a";
@@ -97,6 +103,76 @@ const ScribbleCraftCanvas = forwardRef<{ downloadImage: () => void }, ScribbleCr
             y += LINE_HEIGHT;
         }
       };
+      
+      const drawWhitePaper = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
+        ctx.fillStyle = "#fdfdfc";
+        ctx.fillRect(0, 0, width, height);
+        
+        const grd = ctx.createLinearGradient(0, 0, 0, height);
+        grd.addColorStop(0, "rgba(0,0,0,0.05)");
+        grd.addColorStop(0.5, "rgba(0,0,0,0)");
+        grd.addColorStop(1, "rgba(0,0,0,0.05)");
+        ctx.fillStyle = grd;
+        ctx.fillRect(0, 0, width, height);
+      }
+
+      const drawNotebookPaper = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(0, 0, width, height);
+
+        // Blue lines
+        ctx.strokeStyle = "rgba(173, 216, 230, 0.5)";
+        ctx.lineWidth = 1;
+        for (let y = PADDING; y < height; y += LINE_HEIGHT) {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(width, y);
+            ctx.stroke();
+        }
+
+        // Red line
+        ctx.strokeStyle = "rgba(255, 182, 193, 0.8)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(PADDING * 1.5, 0);
+        ctx.lineTo(PADDING * 1.5, height);
+        ctx.stroke();
+      }
+      
+      const drawDiaryPage = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
+        ctx.fillStyle = "#f3f0e8";
+        ctx.fillRect(0, 0, width, height);
+
+        // Add some texture
+        for (let i = 0; i < 5000; i++) {
+            const x = Math.random() * width;
+            const y = Math.random() * height;
+            const alpha = Math.random() * 0.05;
+            ctx.fillStyle = `rgba(0,0,0,${alpha})`;
+            ctx.fillRect(x, y, 2, 2);
+        }
+        // Decorative border
+        ctx.strokeStyle = "#e0d8c6";
+        ctx.lineWidth = 15;
+        ctx.strokeRect(7.5, 7.5, width - 15, height - 15);
+      }
+      
+      const drawOldPaper = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
+        ctx.fillStyle = "#f5e8c8";
+        ctx.fillRect(0, 0, width, height);
+
+        // Stains
+        for (let i = 0; i < 20; i++) {
+            const x = Math.random() * width;
+            const y = Math.random() * height;
+            const radius = Math.random() * 50 + 20;
+            const grd = ctx.createRadialGradient(x, y, 0, x, y, radius);
+            grd.addColorStop(0, "rgba(165, 42, 42, 0.05)");
+            grd.addColorStop(1, "rgba(165, 42, 42, 0)");
+            ctx.fillStyle = grd;
+            ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+        }
+      }
 
       const resizeObserver = new ResizeObserver(draw);
       resizeObserver.observe(container);
@@ -105,7 +181,7 @@ const ScribbleCraftCanvas = forwardRef<{ downloadImage: () => void }, ScribbleCr
       draw();
 
       return () => resizeObserver.unobserve(container);
-    }, [text, fontFamily]);
+    }, [text, fontFamily, paperType]);
 
     return (
       <div ref={containerRef} className="w-full h-full min-h-[500px] bg-white rounded-md overflow-hidden">

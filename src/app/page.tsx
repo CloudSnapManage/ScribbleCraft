@@ -49,10 +49,17 @@ const fontOptions = [
   { value: "'Zeyada', cursive", label: "Zeyada" },
 ];
 
+const paperOptions = [
+    { value: "white-paper", label: "White Paper" },
+    { value: "notebook-paper", label: "Notebook Paper" },
+    { value: "diary-page", label: "Diary Page" },
+    { value: "old-paper", label: "Old Paper" },
+]
 
 export default function Home() {
   const [text, setText] = useState(INITIAL_TEXT);
   const [fontFamily, setFontFamily] = useState(fontOptions[0].value);
+  const [paperType, setPaperType] = useState(paperOptions[0].value);
   const canvasRef = useRef<CanvasHandle>(null);
 
   const handleDownload = () => {
@@ -130,18 +137,20 @@ export default function Home() {
                      <SelectItem value="light-black">Light Black</SelectItem>
                   </SelectContent>
                 </Select>
-                <Select>
+                <Select value={paperType} onValueChange={setPaperType}>
                   <SelectTrigger>
                     <SelectValue placeholder="Paper Type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="white-paper-1">White Paper 1</SelectItem>
+                    {paperOptions.map(paper => (
+                        <SelectItem key={paper.value} value={paper.value}>{paper.label}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
               
               <div className="bg-white p-4 rounded-lg shadow-md">
-                 <ScribbleCraftCanvas ref={canvasRef} text={text} fontFamily={fontFamily} />
+                 <ScribbleCraftCanvas ref={canvasRef} text={text} fontFamily={fontFamily} paperType={paperType} />
               </div>
               
               <div className="flex justify-between items-center mt-6">
