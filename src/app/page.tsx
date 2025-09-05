@@ -47,6 +47,16 @@ const fontOptions = [
   { value: "'Zeyada', cursive", label: "Zeyada" },
 ];
 
+const fontSizeOptions = [
+    { value: "16", label: "16px" },
+    { value: "24", label: "24px" },
+    { value: "32", label: "32px" },
+    { value: "42", label: "42px" },
+    { value: "56", label: "56px" },
+    { value: "64", label: "64px" },
+    { value: "72", label: "72px" },
+]
+
 const paperOptions = [
     { value: "white-paper", label: "White Paper" },
     { value: "notebook-paper", label: "Notebook Paper" },
@@ -126,18 +136,19 @@ export default function Home() {
               </Select>
 
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="font-size-input" className="text-sm font-medium text-gray-500">Font Size</label>
-                  <Input
-                    id="font-size-input"
-                    type="number"
-                    value={fontSize}
-                    onChange={(e) => setFontSize(Number(e.target.value))}
-                    className="mt-2"
-                    min={8}
-                    max={128}
-                  />
-                </div>
+                <Select value={String(fontSize)} onValueChange={(value) => setFontSize(Number(value))}>
+                    <SelectTrigger>
+                        <div>
+                            <div className="text-sm text-gray-500">Font Size</div>
+                            <SelectValue placeholder="Font Size" />
+                        </div>
+                    </SelectTrigger>
+                    <SelectContent>
+                        {fontSizeOptions.map(size => (
+                            <SelectItem key={size.value} value={size.value}>{size.label}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
                 <Select>
                   <SelectTrigger>
                     <div className="flex items-center">
