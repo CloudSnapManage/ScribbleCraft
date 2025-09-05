@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Download, Trash2, GraduationCap, Pilcrow, Type, Palette, Baseline, Bot } from "lucide-react";
+import { Download, Trash2, GraduationCap, Pilcrow, Type, Palette, Baseline } from "lucide-react";
 
 import ScribbleCraftCanvas from "@/components/ScribbleCraftCanvas";
 import TextEditor from "@/components/TextEditor";
@@ -100,7 +100,7 @@ export default function Home() {
   };
 
   const handleReset = () => {
-    setText(INITIAL_TEXT);
+    setText("");
     setFontFamily(fontOptions[0].value);
     setPaperType(paperOptions[0].value);
     setFontSize(42);
@@ -111,11 +111,10 @@ export default function Home() {
     <div className="flex flex-col min-h-dvh bg-gray-50">
       <header className="container mx-auto px-4 py-4 flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight" style={{fontFamily: "'Shadows Into Light', cursive"}}>ScribbleCraft AI</h1>
+          <h1 className="text-3xl font-bold tracking-tight" style={{fontFamily: "'Shadows Into Light', cursive"}}>ScribbleCraft</h1>
           <p className="text-muted-foreground">Turn your typed text into beautiful handwriting.</p>
         </div>
         <div className="flex gap-2">
-            <Button variant="ghost"><Bot className="mr-2"/> AI suggestions</Button>
             <Button variant="outline" onClick={handleReset}><Trash2 className="mr-2"/>Reset All</Button>
         </div>
 
