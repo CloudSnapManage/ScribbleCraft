@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Info, Download } from "lucide-react";
+import { Info, Download, Trash2, GraduationCap } from "lucide-react";
 
 import ScribbleCraftCanvas from "@/components/ScribbleCraftCanvas";
 
@@ -24,9 +24,16 @@ type CanvasHandle = {
   downloadImage: () => void;
 };
 
-const INITIAL_TEXT = `This is a sample text to showcase the handwriting generation.
-You can type your own text in the editor above.
-Enjoy creating beautiful handwritten notes!`;
+const INITIAL_TEXT = `When the Time is Right
+
+I thought love was forever,
+but maybe it is only a teacher.
+Attraction, crushes, even longing—
+all chapters,
+not the book itself.
+I see it now:
+these feelings are seasons,
+meant to pass,`;
 
 const fontOptions = [
   { value: "'Shadows Into Light', cursive", label: "Shadows Into Light" },
@@ -80,21 +87,84 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-dvh bg-gray-50">
       <main className="container mx-auto px-4 py-8 flex-grow w-full max-w-4xl">
-        <Tabs defaultValue="text-editor">
+        <Tabs defaultValue="text-area">
           <div className="flex justify-between items-center mb-4">
             <TabsList>
               <TabsTrigger value="text-area">Text Area</TabsTrigger>
               <TabsTrigger value="text-editor">Text Editor</TabsTrigger>
             </TabsList>
-            <Button variant="outline">Reset All</Button>
+            <Button variant="outline"><Trash2 className="mr-2"/>Reset All</Button>
           </div>
 
           <TabsContent value="text-area">
-            <Card>
-              <CardContent className="p-4">
-                <p>Text Area Content</p>
-              </CardContent>
-            </Card>
+            <div className="space-y-4">
+              <Card>
+                <CardContent className="p-4 relative">
+                   <div className="absolute top-4 right-4 bg-primary text-primary-foreground px-2 py-1 rounded-md text-xs flex items-center">
+                    <GraduationCap className="h-4 w-4 mr-1"/>
+                    MULTIPAGE SUPPORTED
+                  </div>
+                  <label htmlFor="text-area-input" className="text-sm font-medium text-gray-500">Text</label>
+                  <Textarea
+                    id="text-area-input"
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
+                    placeholder="Start typing..."
+                    className="min-h-[250px] text-base resize-y border-0 focus-visible:ring-0 px-0 mt-1"
+                    aria-label="Text input for handwriting generation"
+                  />
+                </CardContent>
+              </Card>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <Select value={fontFamily} onValueChange={setFontFamily}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Font Family" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {fontOptions.map(font => (
+                      <SelectItem key={font.value} value={font.value} style={{fontFamily: font.value}}>{font.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select defaultValue="16">
+                  <SelectTrigger>
+                    <SelectValue placeholder="Font Size" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="16">16px</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select>
+                  <SelectTrigger>
+                     <div className="flex items-center">
+                      <div className="w-5 h-5 rounded-full mr-2" style={{backgroundColor: '#3a3a3a'}}></div>
+                      <SelectValue placeholder="Ink Color" />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent>
+                     <SelectItem value="light-black">
+                        <div className="flex items-center">
+                          <div className="w-5 h-5 rounded-full mr-2" style={{backgroundColor: '#3a3a3a'}}></div>
+                          Light Black
+                        </div>
+                     </SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={paperType} onValueChange={setPaperType}>
+                  <SelectTrigger>
+                    <div className="flex items-center">
+                       <div className="w-5 h-5 rounded-md mr-2 border bg-white"></div>
+                       <SelectValue placeholder="Paper Type" />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {paperOptions.map(paper => (
+                        <SelectItem key={paper.value} value={paper.value}>{paper.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           </TabsContent>
           <TabsContent value="text-editor">
             <div className="space-y-4">
