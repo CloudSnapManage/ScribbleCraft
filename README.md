@@ -43,8 +43,8 @@ To get a local copy up and running, follow these simple steps.
 
 1. **Clone the repository:**
    ```sh
-   git clone https://github.com/cloudsnapmanage/scribblecraft.git
-   cd scribblecraft
+   git clone https://github.com/CloudSnapManage/ScribbleCraft.git
+   cd ScribbleCraft
    ```
 
 2. **Install dependencies:**
