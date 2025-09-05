@@ -54,6 +54,17 @@ const paperOptions = [
     { value: "notebook-paper", label: "Notebook Paper" },
     { value: "diary-page", label: "Diary Page" },
     { value: "old-paper", label: "Old Paper" },
+    { value: "graph-paper", label: "Graph Paper" },
+    { value: "blueprint", label: "Blueprint" },
+    { value: "blackboard", label: "Blackboard" },
+    { value: "corkboard", label: "Corkboard" },
+    { value: "parchment", label: "Parchment" },
+    { value: "legal-pad", label: "Legal Pad" },
+    { value: "dotted-grid", label: "Dotted Grid" },
+    { value: "stone-tablet", label: "Stone Tablet" },
+    { value: "papyrus", label: "Papyrus" },
+    { value: "linen-paper", label: "Linen Paper" },
+    { value: "watercolor-paper", label: "Watercolor Paper" },
 ]
 
 export default function Home() {
