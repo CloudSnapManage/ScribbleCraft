@@ -41,7 +41,8 @@ const ScribbleCraftCanvas = forwardRef<{ downloadImage: () => void }, ScribbleCr
         const { width } = container.getBoundingClientRect();
         const dpr = window.devicePixelRatio || 1;
         const canvasWidth = width;
-        const canvasHeight = width * 1.414; // A4-ish aspect ratio
+        // Make the canvas taller
+        const canvasHeight = Math.max(500, width * 1.414); 
 
         canvas.width = canvasWidth * dpr;
         canvas.height = canvasHeight * dpr;
@@ -49,8 +50,17 @@ const ScribbleCraftCanvas = forwardRef<{ downloadImage: () => void }, ScribbleCr
         canvas.style.height = `${canvasHeight}px`;
         ctx.scale(dpr, dpr);
 
-        ctx.fillStyle = "#FFFFFF";
+        // Draw a crumpled paper background
+        ctx.fillStyle = "#fdfdfc";
         ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+        
+        const grd = ctx.createLinearGradient(0, 0, 0, canvasHeight);
+        grd.addColorStop(0, "rgba(0,0,0,0.05)");
+        grd.addColorStop(0.5, "rgba(0,0,0,0)");
+        grd.addColorStop(1, "rgba(0,0,0,0.05)");
+        ctx.fillStyle = grd;
+        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
 
         ctx.fillStyle = "#1a1a1a";
         ctx.font = `${FONT_SIZE}px ${FONT_FAMILY}`;
@@ -98,7 +108,7 @@ const ScribbleCraftCanvas = forwardRef<{ downloadImage: () => void }, ScribbleCr
     }, [text]);
 
     return (
-      <div ref={containerRef} className="w-full h-full aspect-[1/1.414] bg-white rounded-md overflow-hidden border shadow-inner">
+      <div ref={containerRef} className="w-full h-full min-h-[500px] bg-white rounded-md overflow-hidden">
         <canvas ref={canvasRef} />
       </div>
     );
