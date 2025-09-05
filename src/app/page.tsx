@@ -24,10 +24,35 @@ type CanvasHandle = {
   downloadImage: () => void;
 };
 
-const INITIAL_TEXT = `test test`;
+const INITIAL_TEXT = `This is a sample text to showcase the handwriting generation.
+You can type your own text in the editor above.
+Enjoy creating beautiful handwritten notes!`;
+
+const fontOptions = [
+  { value: "'Shadows Into Light', cursive", label: "Shadows Into Light" },
+  { value: "'Patrick Hand', cursive", label: "Patrick Hand" },
+  { value: "'Caveat', cursive", label: "Caveat" },
+  { value: "'Dancing Script', cursive", label: "Dancing Script" },
+  { value: "'Kalam', cursive", label: "Kalam" },
+  { value: "'Gaegu', cursive", label: "Gaegu" },
+  { value: "'Gochi Hand', cursive", label: "Gochi Hand" },
+  { value: "'Handlee', cursive", label: "Handlee" },
+  { value: "'Indie Flower', cursive", label: "Indie Flower" },
+  { value: "'Just Me Again Down Here', cursive", label: "Just Me Again Down Here" },
+  { value: "'Marck Script', cursive", label: "Marck Script" },
+  { value: "'Nanum Pen Script', cursive", label: "Nanum Pen Script" },
+  { value: "'Nothing You Could Do', cursive", label: "Nothing You Could Do" },
+  { value: "'Permanent Marker', cursive", label: "Permanent Marker" },
+  { value: "'Rock Salt', cursive", label: "Rock Salt" },
+  { value: "'Sue Ellen Francisco', cursive", label: "Sue Ellen Francisco" },
+  { value: "'Waiting for the Sunrise', cursive", label: "Waiting for the Sunrise" },
+  { value: "'Zeyada', cursive", label: "Zeyada" },
+];
+
 
 export default function Home() {
   const [text, setText] = useState(INITIAL_TEXT);
+  const [fontFamily, setFontFamily] = useState(fontOptions[0].value);
   const canvasRef = useRef<CanvasHandle>(null);
 
   const handleDownload = () => {
@@ -79,12 +104,14 @@ export default function Home() {
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <Select>
+                <Select value={fontFamily} onValueChange={setFontFamily}>
                   <SelectTrigger>
                     <SelectValue placeholder="Font Family" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="alima">Alima (as(if), Latin, Bengali)</SelectItem>
+                    {fontOptions.map(font => (
+                      <SelectItem key={font.value} value={font.value}>{font.label}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <Select defaultValue="16">
@@ -123,7 +150,7 @@ export default function Home() {
               </div>
 
               <div className="bg-white p-4 rounded-lg shadow-md">
-                 <ScribbleCraftCanvas ref={canvasRef} text={text} />
+                 <ScribbleCraftCanvas ref={canvasRef} text={text} fontFamily={fontFamily} />
               </div>
               
               <div className="flex justify-between items-center mt-6">

@@ -18,7 +18,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&family=Shadows+Into+Light&display=swap"
+          href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&family=Shadows+Into+Light&family=Patrick+Hand&family=Caveat&family=Dancing+Script&family=Kalam&family=Gaegu&family=Gochi+Hand&family=Handlee&family=Indie+Flower&family=Just+Me+Again+Down+Here&family=Marck+Script&family=Nanum+Pen+Script&family=Nothing+You+Could+Do&family=Permanent+Marker&family=Rock+Salt&family=Sue+Ellen+Francisco&family=Waiting+for+the+Sunrise&family=Zeyada&display=swap"
           rel="stylesheet"
         />
       </head>

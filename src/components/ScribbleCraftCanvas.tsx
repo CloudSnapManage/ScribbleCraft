@@ -4,15 +4,15 @@ import { useEffect, useRef, forwardRef, useImperativeHandle } from "react";
 
 interface ScribbleCraftCanvasProps {
   text: string;
+  fontFamily: string;
 }
 
 const ScribbleCraftCanvas = forwardRef<{ downloadImage: () => void }, ScribbleCraftCanvasProps>(
-  ({ text }, ref) => {
+  ({ text, fontFamily }, ref) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const FONT_SIZE = 42;
     const LINE_HEIGHT = FONT_SIZE * 1.5;
-    const FONT_FAMILY = "'Shadows Into Light', cursive";
     const PADDING = 40;
 
     useImperativeHandle(ref, () => ({
@@ -63,7 +63,7 @@ const ScribbleCraftCanvas = forwardRef<{ downloadImage: () => void }, ScribbleCr
 
 
         ctx.fillStyle = "#1a1a1a";
-        ctx.font = `${FONT_SIZE}px ${FONT_FAMILY}`;
+        ctx.font = `${FONT_SIZE}px ${fontFamily}`;
         ctx.textBaseline = "top";
 
         const linesFromInput = text.split('\n');
@@ -105,7 +105,7 @@ const ScribbleCraftCanvas = forwardRef<{ downloadImage: () => void }, ScribbleCr
       draw();
 
       return () => resizeObserver.unobserve(container);
-    }, [text]);
+    }, [text, fontFamily]);
 
     return (
       <div ref={containerRef} className="w-full h-full min-h-[500px] bg-white rounded-md overflow-hidden">
