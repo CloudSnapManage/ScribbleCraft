@@ -24,16 +24,7 @@ type CanvasHandle = {
   downloadImage: () => void;
 };
 
-const INITIAL_TEXT = `When the Time is Right
-
-I thought love was forever,
-but maybe it is only a teacher.
-Attraction, crushes, even longing—
-all chapters,
-not the book itself.
-I see it now:
-these feelings are seasons,
-meant to pass,`;
+const INITIAL_TEXT = "";
 
 const fontOptions = [
   { value: "'Shadows Into Light', cursive", label: "Shadows Into Light" },
