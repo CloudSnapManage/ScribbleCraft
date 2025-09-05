@@ -2,7 +2,6 @@
 "use client";
 
 import { useState, useRef, type RefObject } from "react";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -15,15 +14,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Download, Trash2, GraduationCap } from "lucide-react";
+import { Download, Trash2, GraduationCap, Pilcrow, Type, Palette, Baseline, Bot } from "lucide-react";
 
 import ScribbleCraftCanvas from "@/components/ScribbleCraftCanvas";
+import TextEditor from "@/components/TextEditor";
 
 type CanvasHandle = {
   downloadImage: () => void;
 };
 
-const INITIAL_TEXT = "";
+const INITIAL_TEXT = "<p>Start typing...</p>";
 
 const fontOptions = [
   { value: "'Shadows Into Light', cursive", label: "Shadows Into Light" },
@@ -75,12 +75,16 @@ const paperOptions = [
 ]
 
 const inkColorOptions = [
+    { value: "#000000", label: "Black" },
     { value: "#3a3a3a", label: "Light Black" },
     { value: "#0000FF", label: "Blue" },
     { value: "#FF0000", label: "Red" },
     { value: "#008000", label: "Green" },
     { value: "#800080", label: "Purple" },
     { value: "#A52A2A", label: "Brown" },
+    { value: "#FFA500", label: "Orange" },
+    { value: "#FFC0CB", label: "Pink" },
+    { value: "#FFFF00", label: "Yellow" },
 ]
 
 export default function Home() {
@@ -110,46 +114,58 @@ export default function Home() {
           <h1 className="text-3xl font-bold tracking-tight" style={{fontFamily: "'Shadows Into Light', cursive"}}>ScribbleCraft AI</h1>
           <p className="text-muted-foreground">Turn your typed text into beautiful handwriting.</p>
         </div>
-        <Button variant="outline" onClick={handleReset}><Trash2 className="mr-2"/>Reset All</Button>
+        <div className="flex gap-2">
+            <Button variant="ghost"><Bot className="mr-2"/> AI suggestions</Button>
+            <Button variant="outline" onClick={handleReset}><Trash2 className="mr-2"/>Reset All</Button>
+        </div>
+
       </header>
       <main className="container mx-auto px-4 pb-8 flex-grow w-full max-w-7xl">
          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
           <div className="lg:col-span-1 space-y-6">
             <Card>
-              <CardContent className="p-4 relative">
-                <div className="absolute top-4 right-4 bg-primary text-primary-foreground px-2 py-1 rounded-md text-xs flex items-center">
-                  <GraduationCap className="h-4 w-4 mr-1"/>
-                  MULTIPAGE SUPPORTED
-                </div>
-                <label htmlFor="text-area-input" className="text-sm font-medium text-gray-500">Text</label>
-                <Textarea
-                  id="text-area-input"
-                  value={text}
-                  onChange={(e) => setText(e.target.value)}
-                  placeholder="Start typing..."
-                  className="min-h-[250px] text-base resize-y border-0 focus-visible:ring-0 px-0 mt-1"
-                  aria-label="Text input for handwriting generation"
-                />
+              <CardContent className="p-0">
+                <TextEditor value={text} onChange={setText} />
               </CardContent>
             </Card>
             
             <div className="space-y-4">
-              <Select value={fontFamily} onValueChange={setFontFamily}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Font Family" />
-                </SelectTrigger>
-                <SelectContent>
-                  {fontOptions.map(font => (
-                    <SelectItem key={font.value} value={font.value} style={{fontFamily: font.value}}>{font.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                <h2 className="text-lg font-semibold flex items-center gap-2"><Pilcrow/> Manuscript options</h2>
+                <div className="grid grid-cols-2 gap-4">
+                    <Select value={fontFamily} onValueChange={setFontFamily}>
+                        <SelectTrigger>
+                             <div>
+                                <div className="text-sm text-gray-500 flex items-center gap-2"><Type/> Font Family</div>
+                                <SelectValue placeholder="Font Family" />
+                            </div>
+                        </SelectTrigger>
+                        <SelectContent>
+                        {fontOptions.map(font => (
+                            <SelectItem key={font.value} value={font.value} style={{fontFamily: font.value}}>{font.label}</SelectItem>
+                        ))}
+                        </SelectContent>
+                    </Select>
+
+                    <Select value={paperType} onValueChange={setPaperType}>
+                        <SelectTrigger>
+                            <div>
+                                <div className="text-sm text-gray-500 flex items-center gap-2"><GraduationCap/> Paper Type</div>
+                                <SelectValue placeholder="Paper Type" />
+                            </div>
+                        </SelectTrigger>
+                        <SelectContent>
+                        {paperOptions.map(paper => (
+                            <SelectItem key={paper.value} value={paper.value}>{paper.label}</SelectItem>
+                        ))}
+                        </SelectContent>
+                    </Select>
+                </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <Select value={String(fontSize)} onValueChange={(value) => setFontSize(Number(value))}>
                     <SelectTrigger>
                         <div>
-                            <div className="text-sm text-gray-500">Font Size</div>
+                            <div className="text-sm text-gray-500 flex items-center gap-2"><Baseline/> Font Size</div>
                             <SelectValue placeholder="Font Size" />
                         </div>
                     </SelectTrigger>
@@ -161,9 +177,9 @@ export default function Home() {
                 </Select>
                 <Select value={inkColor} onValueChange={setInkColor}>
                   <SelectTrigger>
-                    <div className="flex items-center">
-                      <div className="w-5 h-5 rounded-full mr-2" style={{backgroundColor: inkColor}}></div>
-                      <SelectValue placeholder="Ink Color" />
+                    <div className="flex items-center gap-2">
+                        <div className="text-sm text-gray-500 flex items-center gap-2"><Palette/> Ink Color</div>
+                        <div className="w-5 h-5 rounded-full" style={{backgroundColor: inkColor}}></div>
                     </div>
                   </SelectTrigger>
                   <SelectContent>
@@ -179,16 +195,6 @@ export default function Home() {
                 </Select>
               </div>
 
-              <Select value={paperType} onValueChange={setPaperType}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Paper Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {paperOptions.map(paper => (
-                      <SelectItem key={paper.value} value={paper.value}>{paper.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
             
              <div className="flex justify-end items-center">

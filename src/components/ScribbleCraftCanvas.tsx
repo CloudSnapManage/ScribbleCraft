@@ -31,6 +31,32 @@ const ScribbleCraftCanvas = forwardRef<{ downloadImage: () => void }, ScribbleCr
         }
       },
     }));
+    
+    const parseHTML = (html: string) => {
+        if (typeof window === 'undefined') return [];
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const nodes = Array.from(doc.body.childNodes);
+        return nodes.map(node => {
+            if (node.nodeType === Node.TEXT_NODE) {
+                return { type: 'text', content: node.textContent || '', styles: [] };
+            } else if (node.nodeType === Node.ELEMENT_NODE) {
+                const element = node as HTMLElement;
+                const content = element.innerHTML;
+                let styles: string[] = [];
+                if (element.tagName === 'P') return { type: 'p', content, styles: [] };
+                if (element.tagName === 'H1') return { type: 'h1', content, styles: [] };
+                if (element.tagName === 'H2') return { type: 'h2', content, styles: [] };
+                if (element.tagName === 'H3') return { type: 'h3', content, styles: [] };
+                if (element.tagName === 'UL' || element.tagName === 'OL') {
+                    const items = Array.from(element.children).map(li => li.innerHTML);
+                    return { type: element.tagName.toLowerCase(), items };
+                }
+            }
+            return null;
+        }).filter(Boolean);
+    };
+
 
     useEffect(() => {
       const canvas = canvasRef.current;
@@ -55,90 +81,118 @@ const ScribbleCraftCanvas = forwardRef<{ downloadImage: () => void }, ScribbleCr
         canvas.style.height = `${canvasHeight}px`;
         ctx.scale(dpr, dpr);
 
-        // Paper styles
         switch (paperType) {
-          case 'notebook-paper':
-            drawNotebookPaper(ctx, canvasWidth, canvasHeight);
-            break;
-          case 'diary-page':
-            drawDiaryPage(ctx, canvasWidth, canvasHeight);
-            break;
-          case 'old-paper':
-            drawOldPaper(ctx, canvasWidth, canvasHeight);
-            break;
-          case 'graph-paper':
-            drawGraphPaper(ctx, canvasWidth, canvasHeight);
-            break;
-          case 'blueprint':
-            drawBlueprint(ctx, canvasWidth, canvasHeight);
-            break;
-          case 'blackboard':
-            drawBlackboard(ctx, canvasWidth, canvasHeight);
-            break;
-          case 'corkboard':
-            drawCorkboard(ctx, canvasWidth, canvasHeight);
-            break;
-          case 'parchment':
-            drawParchment(ctx, canvasWidth, canvasHeight);
-            break;
-          case 'legal-pad':
-            drawLegalPad(ctx, canvasWidth, canvasHeight);
-            break;
-          case 'dotted-grid':
-            drawDottedGrid(ctx, canvasWidth, canvasHeight);
-            break;
-          case 'stone-tablet':
-            drawStoneTablet(ctx, canvasWidth, canvasHeight);
-            break;
-          case 'papyrus':
-            drawPapyrus(ctx, canvasWidth, canvasHeight);
-            break;
-          case 'linen-paper':
-            drawLinenPaper(ctx, canvasWidth, canvasHeight);
-            break;
-          case 'watercolor-paper':
-            drawWatercolorPaper(ctx, canvasWidth, canvasHeight);
-            break;
-          default: // white-paper
-            drawWhitePaper(ctx, canvasWidth, canvasHeight);
-            break;
+          case 'notebook-paper': drawNotebookPaper(ctx, canvasWidth, canvasHeight); break;
+          case 'diary-page': drawDiaryPage(ctx, canvasWidth, canvasHeight); break;
+          case 'old-paper': drawOldPaper(ctx, canvasWidth, canvasHeight); break;
+          case 'graph-paper': drawGraphPaper(ctx, canvasWidth, canvasHeight); break;
+          case 'blueprint': drawBlueprint(ctx, canvasWidth, canvasHeight); break;
+          case 'blackboard': drawBlackboard(ctx, canvasWidth, canvasHeight); break;
+          case 'corkboard': drawCorkboard(ctx, canvasWidth, canvasHeight); break;
+          case 'parchment': drawParchment(ctx, canvasWidth, canvasHeight); break;
+          case 'legal-pad': drawLegalPad(ctx, canvasWidth, canvasHeight); break;
+          case 'dotted-grid': drawDottedGrid(ctx, canvasWidth, canvasHeight); break;
+          case 'stone-tablet': drawStoneTablet(ctx, canvasWidth, canvasHeight); break;
+          case 'papyrus': drawPapyrus(ctx, canvasWidth, canvasHeight); break;
+          case 'linen-paper': drawLinenPaper(ctx, canvasWidth, canvasHeight); break;
+          case 'watercolor-paper': drawWatercolorPaper(ctx, canvasWidth, canvasHeight); break;
+          default: drawWhitePaper(ctx, canvasWidth, canvasHeight); break;
         }
 
-
         ctx.fillStyle = paperType === 'blackboard' || paperType === 'blueprint' ? '#FFFFFF' : inkColor;
-        ctx.font = `${FONT_SIZE}px ${fontFamily}`;
         ctx.textBaseline = "top";
 
-        const linesFromInput = text.split('\n');
+        const parsedNodes = parseHTML(text);
         let y = PADDING;
 
-        for (const inputLine of linesFromInput) {
-            if (inputLine === '') {
-                y += LINE_HEIGHT;
-                continue;
-            }
+        const drawTextWithStyles = (text: string, x: number, y: number, currentFontSize: number, styles: string[]) => {
+            let fontStyle = '';
+            if (styles.includes('i')) fontStyle += 'italic ';
+            if (styles.includes('b')) fontStyle += 'bold ';
             
-            const words = inputLine.split(' ');
+            ctx.font = `${fontStyle}${currentFontSize}px ${fontFamily}`;
+            
+            const words = text.split(' ');
             let currentLine = '';
-            const x = PADDING;
             const maxWidth = canvasWidth - (PADDING * 2);
+
+            let currentX = x;
 
             for (let i = 0; i < words.length; i++) {
                 const testWord = words[i];
-                const testLine = currentLine.length > 0 ? currentLine + ' ' + testWord : testWord;
+                let testLine = currentLine.length > 0 ? currentLine + ' ' + testWord : testWord;
                 const metrics = ctx.measureText(testLine);
 
-                if (metrics.width > maxWidth && i > 0) {
+                if (currentX + metrics.width > maxWidth && i > 0) {
                     ctx.fillText(currentLine, x, y);
                     currentLine = testWord;
-                    y += LINE_HEIGHT;
+                    y += LINE_HEIGHT * (currentFontSize / FONT_SIZE);
                 } else {
                     currentLine = testLine;
                 }
             }
             ctx.fillText(currentLine, x, y);
-            y += LINE_HEIGHT;
+            return y + LINE_HEIGHT * (currentFontSize / FONT_SIZE);
+        };
+        
+        const renderNode = (node: any) => {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = node.content;
+            
+            let currentX = PADDING;
+            
+            tempDiv.childNodes.forEach(childNode => {
+                let currentText = childNode.textContent || '';
+                let styles: string[] = [];
+                let currentNode: Node | null = childNode;
+
+                while(currentNode && currentNode.nodeName !== '#text' && currentNode.parentElement !== tempDiv) {
+                     styles.push(currentNode.nodeName.toLowerCase());
+                     currentNode = currentNode.parentElement;
+                }
+                
+                 if (childNode.nodeName === 'B' || childNode.nodeName === 'STRONG') styles.push('b');
+                 if (childNode.nodeName === 'I' || childNode.nodeName === 'EM') styles.push('i');
+                 if (childNode.nodeName === 'U') styles.push('u');
+                
+                let currentFontSize = FONT_SIZE;
+                 if (node.type === 'h1') currentFontSize *= 1.8;
+                 if (node.type === 'h2') currentFontSize *= 1.5;
+                 if (node.type === 'h3') currentFontSize *= 1.2;
+
+                 let fontStyle = '';
+                 if (styles.includes('i')) fontStyle += 'italic ';
+                 if (styles.includes('b')) fontStyle += 'bold ';
+                 ctx.font = `${fontStyle}${currentFontSize}px ${fontFamily}`;
+
+
+                const metrics = ctx.measureText(currentText);
+                ctx.fillText(currentText, currentX, y);
+
+                if(styles.includes('u')){
+                    ctx.beginPath();
+                    ctx.moveTo(currentX, y + currentFontSize);
+                    ctx.lineTo(currentX + metrics.width, y + currentFontSize);
+                    ctx.stroke();
+                }
+
+                currentX += metrics.width;
+            });
+
+            y += LINE_HEIGHT * ( (node.type.startsWith('h') ? (FONT_SIZE * ({h1:1.8, h2:1.5, h3:1.2}[node.type] || 1)) : FONT_SIZE) / FONT_SIZE);
         }
+
+        parsedNodes.forEach((node: any) => {
+            if (node.type === 'p' || node.type.startsWith('h')) {
+                renderNode(node)
+            } else if (node.type === 'ul' || node.type === 'ol') {
+                node.items.forEach((item: string, index: number) => {
+                    const prefix = node.type === 'ul' ? '• ' : `${index + 1}. `;
+                    renderNode({type: 'p', content: prefix + item});
+                });
+                y += LINE_HEIGHT * 0.5;
+            }
+        });
       };
       
       const drawWhitePaper = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
