@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -25,6 +25,7 @@ import { Download, Trash2, GraduationCap, Pilcrow, Type, Palette, Baseline, Plus
 import ScribbleCraftCanvas from "@/components/ScribbleCraftCanvas";
 import TextEditor from "@/components/TextEditor";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import LoadingScreen from "@/components/LoadingScreen";
 
 type CanvasHandle = {
   downloadImage: (pages: string[]) => void;
@@ -101,6 +102,7 @@ const inkColorOptions = [
 ];
 
 export default function Home() {
+  const [loading, setLoading] = useState(true);
   const [pages, setPages] = useState([INITIAL_TEXT]);
   const [currentPage, setCurrentPage] = useState(0);
   const [fontFamily, setFontFamily] = useState(fontOptions[0].value);
@@ -108,6 +110,13 @@ export default function Home() {
   const [fontSize, setFontSize] = useState(42);
   const [inkColor, setInkColor] = useState(inkColorOptions[0].value);
   const canvasRef = useRef<CanvasHandle>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 2000); // Simulate a 2-second loading time
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleTextChange = (newText: string) => {
     const newPages = [...pages];
@@ -124,7 +133,7 @@ export default function Home() {
   }
 
   const handleReset = () => {
-    setPages([INITIAL_TEXT]);
+    setPages([""]);
     setCurrentPage(0);
     setFontFamily(fontOptions[0].value);
     setPaperType(paperOptions[0].value);
@@ -148,6 +157,10 @@ export default function Home() {
       setCurrentPage(currentPage + 1);
     }
   };
+  
+  if (loading) {
+    return <LoadingScreen onFinished={() => setLoading(false)} />;
+  }
 
   return (
     <div className="flex flex-col min-h-dvh">
