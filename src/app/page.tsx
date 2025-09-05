@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useRef, type RefObject } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -131,11 +131,11 @@ export default function Home() {
             
             <div className="space-y-4">
                 <h2 className="text-lg font-semibold flex items-center gap-2"><Pilcrow/> Manuscript options</h2>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Select value={fontFamily} onValueChange={setFontFamily}>
                         <SelectTrigger>
-                             <div>
-                                <div className="text-sm text-gray-500 flex items-center gap-2"><Type/> Font Family</div>
+                             <div className="flex items-center gap-2">
+                                <Type className="text-gray-500"/>
                                 <SelectValue placeholder="Font Family" />
                             </div>
                         </SelectTrigger>
@@ -148,8 +148,8 @@ export default function Home() {
 
                     <Select value={paperType} onValueChange={setPaperType}>
                         <SelectTrigger>
-                            <div>
-                                <div className="text-sm text-gray-500 flex items-center gap-2"><GraduationCap/> Paper Type</div>
+                            <div className="flex items-center gap-2">
+                                <GraduationCap className="text-gray-500"/>
                                 <SelectValue placeholder="Paper Type" />
                             </div>
                         </SelectTrigger>
@@ -161,11 +161,11 @@ export default function Home() {
                     </Select>
                 </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Select value={String(fontSize)} onValueChange={(value) => setFontSize(Number(value))}>
                     <SelectTrigger>
-                        <div>
-                            <div className="text-sm text-gray-500 flex items-center gap-2"><Baseline/> Font Size</div>
+                        <div className="flex items-center gap-2">
+                            <Baseline className="text-gray-500"/>
                             <SelectValue placeholder="Font Size" />
                         </div>
                     </SelectTrigger>
@@ -178,15 +178,18 @@ export default function Home() {
                 <Select value={inkColor} onValueChange={setInkColor}>
                   <SelectTrigger>
                     <div className="flex items-center gap-2">
-                        <div className="text-sm text-gray-500 flex items-center gap-2"><Palette/> Ink Color</div>
-                        <div className="w-5 h-5 rounded-full" style={{backgroundColor: inkColor}}></div>
+                        <Palette className="text-gray-500"/>
+                        <div className="flex items-center gap-2">
+                            <div className="w-4 h-4 rounded-full border" style={{backgroundColor: inkColor}}></div>
+                            <span>{inkColorOptions.find(c => c.value === inkColor)?.label}</span>
+                        </div>
                     </div>
                   </SelectTrigger>
                   <SelectContent>
                     {inkColorOptions.map(color => (
                         <SelectItem key={color.value} value={color.value}>
                             <div className="flex items-center">
-                              <div className="w-5 h-5 rounded-full mr-2" style={{backgroundColor: color.value}}></div>
+                              <div className="w-4 h-4 rounded-full border mr-2" style={{backgroundColor: color.value}}></div>
                               {color.label}
                             </div>
                         </SelectItem>

@@ -31,32 +31,6 @@ const ScribbleCraftCanvas = forwardRef<{ downloadImage: () => void }, ScribbleCr
         }
       },
     }));
-    
-    const parseHTML = (html: string) => {
-        if (typeof window === 'undefined') return [];
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
-        const nodes = Array.from(doc.body.childNodes);
-        return nodes.map(node => {
-            if (node.nodeType === Node.TEXT_NODE) {
-                return { type: 'text', content: node.textContent || '', styles: [] };
-            } else if (node.nodeType === Node.ELEMENT_NODE) {
-                const element = node as HTMLElement;
-                const content = element.innerHTML;
-                let styles: string[] = [];
-                if (element.tagName === 'P') return { type: 'p', content, styles: [] };
-                if (element.tagName === 'H1') return { type: 'h1', content, styles: [] };
-                if (element.tagName === 'H2') return { type: 'h2', content, styles: [] };
-                if (element.tagName === 'H3') return { type: 'h3', content, styles: [] };
-                if (element.tagName === 'UL' || element.tagName === 'OL') {
-                    const items = Array.from(element.children).map(li => li.innerHTML);
-                    return { type: element.tagName.toLowerCase(), items };
-                }
-            }
-            return null;
-        }).filter(Boolean);
-    };
-
 
     useEffect(() => {
       const canvas = canvasRef.current;
@@ -65,9 +39,6 @@ const ScribbleCraftCanvas = forwardRef<{ downloadImage: () => void }, ScribbleCr
 
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
-      
-      const FONT_SIZE = fontSize;
-      const LINE_HEIGHT = FONT_SIZE * 1.5;
 
       const draw = () => {
         const { width } = container.getBoundingClientRect();
@@ -101,98 +72,117 @@ const ScribbleCraftCanvas = forwardRef<{ downloadImage: () => void }, ScribbleCr
 
         ctx.fillStyle = paperType === 'blackboard' || paperType === 'blueprint' ? '#FFFFFF' : inkColor;
         ctx.textBaseline = "top";
-
-        const parsedNodes = parseHTML(text);
-        let y = PADDING;
-
-        const drawTextWithStyles = (text: string, x: number, y: number, currentFontSize: number, styles: string[]) => {
-            let fontStyle = '';
-            if (styles.includes('i')) fontStyle += 'italic ';
-            if (styles.includes('b')) fontStyle += 'bold ';
-            
-            ctx.font = `${fontStyle}${currentFontSize}px ${fontFamily}`;
-            
-            const words = text.split(' ');
-            let currentLine = '';
-            const maxWidth = canvasWidth - (PADDING * 2);
-
-            let currentX = x;
-
-            for (let i = 0; i < words.length; i++) {
-                const testWord = words[i];
-                let testLine = currentLine.length > 0 ? currentLine + ' ' + testWord : testWord;
-                const metrics = ctx.measureText(testLine);
-
-                if (currentX + metrics.width > maxWidth && i > 0) {
-                    ctx.fillText(currentLine, x, y);
-                    currentLine = testWord;
-                    y += LINE_HEIGHT * (currentFontSize / FONT_SIZE);
-                } else {
-                    currentLine = testLine;
-                }
-            }
-            ctx.fillText(currentLine, x, y);
-            return y + LINE_HEIGHT * (currentFontSize / FONT_SIZE);
-        };
         
-        const renderNode = (node: any) => {
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = node.content;
-            
-            let currentX = PADDING;
-            
-            tempDiv.childNodes.forEach(childNode => {
-                let currentText = childNode.textContent || '';
-                let styles: string[] = [];
-                let currentNode: Node | null = childNode;
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(text, 'text/html');
 
-                while(currentNode && currentNode.nodeName !== '#text' && currentNode.parentElement !== tempDiv) {
-                     styles.push(currentNode.nodeName.toLowerCase());
-                     currentNode = currentNode.parentElement;
-                }
-                
-                 if (childNode.nodeName === 'B' || childNode.nodeName === 'STRONG') styles.push('b');
-                 if (childNode.nodeName === 'I' || childNode.nodeName === 'EM') styles.push('i');
-                 if (childNode.nodeName === 'U') styles.push('u');
-                
-                let currentFontSize = FONT_SIZE;
-                 if (node.type === 'h1') currentFontSize *= 1.8;
-                 if (node.type === 'h2') currentFontSize *= 1.5;
-                 if (node.type === 'h3') currentFontSize *= 1.2;
+        let y = PADDING;
+        let x = PADDING;
+        const maxWidth = canvasWidth - PADDING * 2;
 
-                 let fontStyle = '';
-                 if (styles.includes('i')) fontStyle += 'italic ';
-                 if (styles.includes('b')) fontStyle += 'bold ';
-                 ctx.font = `${fontStyle}${currentFontSize}px ${fontFamily}`;
-
-
-                const metrics = ctx.measureText(currentText);
-                ctx.fillText(currentText, currentX, y);
-
-                if(styles.includes('u')){
-                    ctx.beginPath();
-                    ctx.moveTo(currentX, y + currentFontSize);
-                    ctx.lineTo(currentX + metrics.width, y + currentFontSize);
-                    ctx.stroke();
-                }
-
-                currentX += metrics.width;
-            });
-
-            y += LINE_HEIGHT * ( (node.type.startsWith('h') ? (FONT_SIZE * ({h1:1.8, h2:1.5, h3:1.2}[node.type] || 1)) : FONT_SIZE) / FONT_SIZE);
+        const applyStyles = (element: HTMLElement) => {
+            let styles = [];
+            let current: HTMLElement | null = element;
+            while(current && current.nodeName !== 'BODY') {
+                styles.push(current.nodeName.toLowerCase());
+                current = current.parentElement;
+            }
+            return styles;
         }
 
-        parsedNodes.forEach((node: any) => {
-            if (node.type === 'p' || node.type.startsWith('h')) {
-                renderNode(node)
-            } else if (node.type === 'ul' || node.type === 'ol') {
-                node.items.forEach((item: string, index: number) => {
-                    const prefix = node.type === 'ul' ? '• ' : `${index + 1}. `;
-                    renderNode({type: 'p', content: prefix + item});
-                });
-                y += LINE_HEIGHT * 0.5;
+        const renderNode = (node: ChildNode, parentStyles: string[]) => {
+            if (node.nodeType === Node.TEXT_NODE) {
+                const text = node.textContent || '';
+                if (!text.trim()) return;
+
+                let currentFontSize = fontSize;
+                if (parentStyles.includes('h1')) currentFontSize *= 1.8;
+                else if (parentStyles.includes('h2')) currentFontSize *= 1.5;
+                else if (parentStyles.includes('h3')) currentFontSize *= 1.2;
+
+                const lineHeight = currentFontSize * 1.5;
+                
+                let fontStyle = '';
+                if (parentStyles.includes('i') || parentStyles.includes('em')) fontStyle += 'italic ';
+                if (parentStyles.includes('b') || parentStyles.includes('strong')) fontStyle += 'bold ';
+                ctx.font = `${fontStyle}${currentFontSize}px ${fontFamily}`;
+
+                const words = text.split(' ');
+                for(const word of words) {
+                    const testLine = x === PADDING ? word : ' ' + word;
+                    const metrics = ctx.measureText(testLine);
+                    
+                    if (x + metrics.width > PADDING + maxWidth && x > PADDING) {
+                        x = PADDING;
+                        y += lineHeight;
+                    }
+                    
+                    const wordMetrics = ctx.measureText(word);
+                    ctx.fillText(word, x, y);
+
+                    if(parentStyles.includes('u')) {
+                        ctx.beginPath();
+                        ctx.moveTo(x, y + currentFontSize + 2);
+                        ctx.lineTo(x + wordMetrics.width, y + currentFontSize + 2);
+                        ctx.strokeStyle = ctx.fillStyle;
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+                    }
+                    
+                    x += wordMetrics.width;
+                    // Add space after word
+                    x += ctx.measureText(' ').width;
+                }
+
+            } else if (node.nodeType === Node.ELEMENT_NODE) {
+                const element = node as HTMLElement;
+                const tagName = element.tagName.toLowerCase();
+                const styles = [...parentStyles, tagName];
+                
+                let isBlock = ['p', 'h1', 'h2', 'h3', 'ul', 'ol', 'li'].includes(tagName);
+                
+                if (isBlock && x > PADDING) {
+                    x = PADDING;
+                    let currentFontSize = fontSize;
+                    if (parentStyles.includes('h1')) currentFontSize *= 1.8;
+                    else if (parentStyles.includes('h2')) currentFontSize *= 1.5;
+                    else if (parentStyles.includes('h3')) currentFontSize *= 1.2;
+                    y += currentFontSize * 1.5;
+                }
+                
+                if(tagName === 'ul' || tagName === 'ol') {
+                    Array.from(element.childNodes).forEach((child, index) => {
+                         if(child.nodeName.toLowerCase() === 'li') {
+                             x = PADDING;
+                             let currentFontSize = fontSize;
+                             const lineHeight = currentFontSize * 1.5;
+                             ctx.font = `${currentFontSize}px ${fontFamily}`;
+                             
+                             const prefix = tagName === 'ul' ? '• ' : `${index + 1}. `;
+                             ctx.fillText(prefix, x, y);
+                             x += ctx.measureText(prefix).width;
+
+                             Array.from(child.childNodes).forEach(liChild => renderNode(liChild, styles));
+                             x = PADDING;
+                             y += lineHeight;
+                         }
+                    });
+                } else {
+                    Array.from(element.childNodes).forEach(child => renderNode(child, styles));
+                }
+
+                if (isBlock) {
+                    x = PADDING;
+                    let currentFontSize = fontSize;
+                     if (styles.includes('h1')) currentFontSize *= 1.8;
+                     else if (styles.includes('h2')) currentFontSize *= 1.5;
+                     else if (styles.includes('h3')) currentFontSize *= 1.2;
+                    y += (currentFontSize * 1.5) * 0.5; // add some space after block elements
+                }
             }
-        });
+        };
+
+        Array.from(doc.body.childNodes).forEach(node => renderNode(node, []));
       };
       
       const drawWhitePaper = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
@@ -214,7 +204,8 @@ const ScribbleCraftCanvas = forwardRef<{ downloadImage: () => void }, ScribbleCr
         // Blue lines
         ctx.strokeStyle = "rgba(173, 216, 230, 0.5)";
         ctx.lineWidth = 1;
-        for (let y = PADDING; y < height; y += LINE_HEIGHT) {
+        const lineHeight = fontSize * 1.5;
+        for (let y = PADDING; y < height; y += lineHeight) {
             ctx.beginPath();
             ctx.moveTo(0, y);
             ctx.lineTo(width, y);
@@ -343,7 +334,8 @@ const ScribbleCraftCanvas = forwardRef<{ downloadImage: () => void }, ScribbleCr
         ctx.fillRect(0, 0, width, height);
         ctx.strokeStyle = "rgba(173, 216, 230, 0.7)";
         ctx.lineWidth = 1;
-        for (let y = PADDING; y < height; y += LINE_HEIGHT) {
+        const lineHeight = fontSize * 1.5;
+        for (let y = PADDING; y < height; y += lineHeight) {
             ctx.beginPath();
             ctx.moveTo(PADDING * 2, y);
             ctx.lineTo(width, y);
@@ -447,12 +439,17 @@ const ScribbleCraftCanvas = forwardRef<{ downloadImage: () => void }, ScribbleCr
       }
 
       const resizeObserver = new ResizeObserver(draw);
-      resizeObserver.observe(container);
-
-      // Initial draw
+      if (container) {
+        resizeObserver.observe(container);
+      }
+      
       draw();
 
-      return () => resizeObserver.unobserve(container);
+      return () => {
+        if(container) {
+            resizeObserver.unobserve(container)
+        }
+      };
     }, [text, fontFamily, paperType, fontSize, inkColor]);
 
     return (
