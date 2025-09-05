@@ -2,6 +2,7 @@
 "use client";
 import React, { useRef, useEffect, useState } from 'react';
 import { Bold, Italic, Underline, List, ListOrdered, Heading1, Heading2, Heading3 } from 'lucide-react';
+import { ScrollArea } from './ui/scroll-area';
 
 interface TextEditorProps {
     value: string;
@@ -14,7 +15,7 @@ const ToolbarButton = ({ icon: Icon, onClick, active = false }: { icon: React.El
         onMouseDown={e => e.preventDefault()}
         className={`p-2 rounded-md hover:bg-accent ${active ? 'bg-muted' : ''}`}
     >
-        <Icon className="h-5 w-5" />
+        <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
     </button>
 );
 
@@ -86,8 +87,8 @@ const TextEditor: React.FC<TextEditorProps> = ({ value, onChange }) => {
     }, []);
     
     return (
-        <div className="border rounded-lg">
-            <div className="toolbar flex items-center gap-1 p-2 border-b bg-card">
+        <div className="border rounded-lg bg-card">
+            <div className="toolbar flex items-center gap-1 p-1 sm:p-2 border-b flex-wrap">
                 <ToolbarButton icon={Heading1} onClick={() => execCommand('formatBlock', '<h1>')} active={activeButtons['h1']} />
                 <ToolbarButton icon={Heading2} onClick={() => execCommand('formatBlock', '<h2>')} active={activeButtons['h2']} />
                 <ToolbarButton icon={Heading3} onClick={() => execCommand('formatBlock', '<h3>')} active={activeButtons['h3']} />
@@ -97,14 +98,19 @@ const TextEditor: React.FC<TextEditorProps> = ({ value, onChange }) => {
                 <ToolbarButton icon={List} onClick={() => execCommand('insertUnorderedList')} active={activeButtons['insertUnorderedList']} />
                 <ToolbarButton icon={ListOrdered} onClick={() => execCommand('insertOrderedList')} active={activeButtons['insertOrderedList']} />
             </div>
-            <div
-                ref={editorRef}
-                contentEditable
-                onInput={handleInput}
-                className="p-4 min-h-[250px] outline-none focus:ring-0 bg-card"
-            />
+            <ScrollArea className="h-[250px]">
+                <div
+                    ref={editorRef}
+                    contentEditable
+                    onInput={handleInput}
+                    className="p-4 w-full h-full outline-none focus:ring-0"
+                    style={{minHeight: '250px'}}
+                />
+            </ScrollArea>
         </div>
     );
 };
 
 export default TextEditor;
+
+    

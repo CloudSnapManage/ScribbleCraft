@@ -19,7 +19,7 @@ const ScribbleCraftCanvas = forwardRef<{ downloadImage: (pages: string[]) => voi
     const containerRef = useRef<HTMLDivElement>(null);
     const { resolvedTheme } = useTheme();
     
-    const PADDING = 40;
+    const PADDING = 20;
 
     const drawPage = async (ctx: CanvasRenderingContext2D, pageText: string, width: number, height: number): Promise<void> => {
         return new Promise((resolve) => {
@@ -624,7 +624,7 @@ const ScribbleCraftCanvas = forwardRef<{ downloadImage: (pages: string[]) => voi
 
 
     return (
-      <div ref={containerRef} className="w-full h-full min-h-[500px] overflow-hidden">
+      <div ref={containerRef} className="w-full h-full min-h-[400px] sm:min-h-[500px] overflow-hidden rounded-lg">
         <canvas ref={canvasRef} />
       </div>
     );
@@ -634,3 +634,5 @@ const ScribbleCraftCanvas = forwardRef<{ downloadImage: (pages: string[]) => voi
 ScribbleCraftCanvas.displayName = "ScribbleCraftCanvas";
 
 export default ScribbleCraftCanvas;
+
+    

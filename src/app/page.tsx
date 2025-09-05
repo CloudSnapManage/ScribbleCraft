@@ -133,7 +133,7 @@ export default function Home() {
   }
 
   const handleReset = () => {
-    setPages([""]);
+    setPages([INITIAL_TEXT]);
     setCurrentPage(0);
     setFontFamily(fontOptions[0].value);
     setPaperType(paperOptions[0].value);
@@ -163,19 +163,19 @@ export default function Home() {
   }
 
   return (
-    <div className="flex flex-col min-h-dvh">
-      <header className="container mx-auto px-4 py-4 flex justify-between items-center">
-        <div>
+    <div className="flex flex-col min-h-dvh bg-background">
+      <header className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div className="text-center sm:text-left">
           <h1 className="text-3xl font-bold tracking-tight" style={{fontFamily: "'Shadows Into Light', cursive"}}>ScribbleCraft</h1>
-          <p className="text-muted-foreground">Turn your typed text into beautiful handwriting.</p>
+          <p className="text-sm text-muted-foreground">Turn your typed text into beautiful handwriting.</p>
         </div>
         <div className="flex gap-2 items-center">
-            <Button variant="outline" onClick={handleReset}><Trash2 className="mr-2"/>Reset All</Button>
+            <Button variant="outline" onClick={handleReset} size="sm"><Trash2 className="mr-1 sm:mr-2"/><span>Reset</span></Button>
             <ThemeToggle />
         </div>
 
       </header>
-      <main className="container mx-auto px-4 pb-8 flex-grow w-full max-w-7xl">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 pb-8 flex-grow w-full max-w-7xl">
          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
           <div className="lg:col-span-1 space-y-6">
             <Card>
@@ -184,16 +184,16 @@ export default function Home() {
               </CardContent>
             </Card>
             
-            <div className="flex items-center justify-center gap-4">
+            <div className="flex items-center justify-center gap-2 sm:gap-4">
               <Button onClick={goToPrevPage} disabled={currentPage === 0} variant="outline" size="icon"><ChevronLeft/></Button>
-              <span className="text-sm font-medium">Page {currentPage + 1} of {pages.length}</span>
+              <span className="text-sm font-medium whitespace-nowrap">Page {currentPage + 1} of {pages.length}</span>
               <Button onClick={goToNextPage} disabled={currentPage === pages.length - 1} variant="outline" size="icon"><ChevronRight/></Button>
-              <Button onClick={addPage} variant="outline"><Plus className="mr-2"/> Add Page</Button>
+              <Button onClick={addPage} variant="outline" size="sm"><Plus className="mr-1 sm:mr-2"/> Add Page</Button>
             </div>
 
             <div className="space-y-4">
                 <h2 className="text-lg font-semibold flex items-center gap-2"><Pilcrow/> Manuscript options</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Select value={fontFamily} onValueChange={setFontFamily}>
                         <SelectTrigger>
                              <div className="flex items-center gap-2">
@@ -223,7 +223,7 @@ export default function Home() {
                     </Select>
                 </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Select value={String(fontSize)} onValueChange={(value) => setFontSize(Number(value))}>
                     <SelectTrigger>
                         <div className="flex items-center gap-2">
@@ -243,7 +243,7 @@ export default function Home() {
                         <Palette className="text-muted-foreground"/>
                         <div className="flex items-center gap-2">
                             <div className="w-4 h-4 rounded-full border" style={{backgroundColor: inkColor}}></div>
-                            <span>{inkColorOptions.find(c => c.value === inkColor)?.label}</span>
+                            <span className="truncate">{inkColorOptions.find(c => c.value === inkColor)?.label}</span>
                         </div>
                     </div>
                   </SelectTrigger>
@@ -262,12 +262,12 @@ export default function Home() {
 
             </div>
             
-             <div className="flex justify-end items-center">
+             <div className="flex justify-center lg:justify-end items-center">
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button size="lg">
                         <Download className="mr-2"/>
-                        Export Handwriting
+                        Export
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
@@ -285,7 +285,7 @@ export default function Home() {
           </div>
           <div className="lg:col-span-2">
             <Card>
-              <CardContent className="p-4">
+              <CardContent className="p-2 sm:p-4">
                 <ScribbleCraftCanvas ref={canvasRef} text={pages[currentPage]} fontFamily={fontFamily} paperType={paperType} fontSize={fontSize} inkColor={inkColor} />
               </CardContent>
             </Card>
@@ -295,3 +295,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
