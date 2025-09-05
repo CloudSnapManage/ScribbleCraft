@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Download, Trash2, GraduationCap, Pilcrow, Type, Palette, Baseline, Plus, ChevronLeft, ChevronRight, FileImage, FileText } from "lucide-react";
+import { Download, Trash2, GraduationCap, Pilcrow, Type, Palette, Baseline, Plus, ChevronLeft, ChevronRight, FileImage, FileText, Github } from "lucide-react";
 
 import ScribbleCraftCanvas from "@/components/ScribbleCraftCanvas";
 import TextEditor from "@/components/TextEditor";
@@ -172,6 +172,11 @@ export default function Home() {
         <div className="flex gap-2 items-center">
             <Button variant="outline" onClick={handleReset} size="sm"><Trash2 className="mr-1 sm:mr-2"/><span>Reset</span></Button>
             <ThemeToggle />
+            <a href="https://cloudsnapmanage.github.io" target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" size="icon">
+                <Github />
+              </Button>
+            </a>
         </div>
 
       </header>
@@ -295,5 +300,3 @@ export default function Home() {
     </div>
   );
 }
-
-    
