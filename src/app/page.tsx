@@ -110,7 +110,7 @@ export default function Home() {
                   </SelectTrigger>
                   <SelectContent>
                     {fontOptions.map(font => (
-                      <SelectItem key={font.value} value={font.value}>{font.label}</SelectItem>
+                      <SelectItem key={font.value} value={font.value} style={{fontFamily: font.value}}>{font.label}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -140,15 +140,6 @@ export default function Home() {
                 </Select>
               </div>
               
-              <div className="text-center text-xs text-gray-500 my-4">
-                <p>Ads by Google</p>
-                <div className="flex justify-center items-center gap-2 mt-1">
-                    <Button variant="link" className="p-0 h-auto text-blue-600">Send feedback</Button>
-                    <span className="text-gray-400">|</span>
-                    <Button variant="link" className="p-0 h-auto text-gray-500">Why this ad?</Button>
-                </div>
-              </div>
-
               <div className="bg-white p-4 rounded-lg shadow-md">
                  <ScribbleCraftCanvas ref={canvasRef} text={text} fontFamily={fontFamily} />
               </div>
