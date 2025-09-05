@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Slider } from "@/components/ui/slider";
+import { Input } from "@/components/ui/input";
 import { Download, Trash2, GraduationCap } from "lucide-react";
 
 import ScribbleCraftCanvas from "@/components/ScribbleCraftCanvas";
@@ -136,11 +136,16 @@ export default function Home() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Font Size</label>
-                  <div className="flex items-center gap-4 mt-2">
-                    <Slider value={[fontSize]} onValueChange={(value) => setFontSize(value[0])} min={16} max={72} step={1} />
-                    <span className="text-sm font-semibold w-8 text-center">{fontSize}</span>
-                  </div>
+                  <label htmlFor="font-size-input" className="text-sm font-medium text-gray-500">Font Size</label>
+                  <Input
+                    id="font-size-input"
+                    type="number"
+                    value={fontSize}
+                    onChange={(e) => setFontSize(Number(e.target.value))}
+                    className="mt-2"
+                    min={8}
+                    max={128}
+                  />
                 </div>
                 <Select>
                   <SelectTrigger>
