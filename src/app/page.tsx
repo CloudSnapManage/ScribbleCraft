@@ -14,13 +14,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Download, Trash2, GraduationCap, Pilcrow, Type, Palette, Baseline } from "lucide-react";
+import { Download, Trash2, GraduationCap, Pilcrow, Type, Palette, Baseline, Plus, ChevronLeft, ChevronRight } from "lucide-react";
 
 import ScribbleCraftCanvas from "@/components/ScribbleCraftCanvas";
 import TextEditor from "@/components/TextEditor";
 
 type CanvasHandle = {
-  downloadImage: () => void;
+  downloadImage: (pages: string[]) => void;
 };
 
 const INITIAL_TEXT = "<p>Start typing...</p>";
@@ -85,27 +85,57 @@ const inkColorOptions = [
     { value: "#FFA500", label: "Orange" },
     { value: "#FFC0CB", label: "Pink" },
     { value: "#FFFF00", label: "Yellow" },
-]
+    { value: "#4682B4", label: "Steel Blue" },
+    { value: "#8B0000", label: "Dark Red" },
+    { value: "#2E8B57", label: "Sea Green" },
+    { value: "#4B0082", label: "Indigo" },
+    { value: "#D2691E", label: "Chocolate" },
+];
 
 export default function Home() {
-  const [text, setText] = useState(INITIAL_TEXT);
+  const [pages, setPages] = useState([INITIAL_TEXT]);
+  const [currentPage, setCurrentPage] = useState(0);
   const [fontFamily, setFontFamily] = useState(fontOptions[0].value);
   const [paperType, setPaperType] = useState(paperOptions[0].value);
   const [fontSize, setFontSize] = useState(42);
   const [inkColor, setInkColor] = useState(inkColorOptions[0].value);
   const canvasRef = useRef<CanvasHandle>(null);
 
+  const handleTextChange = (newText: string) => {
+    const newPages = [...pages];
+    newPages[currentPage] = newText;
+    setPages(newPages);
+  };
+
   const handleDownload = () => {
-    canvasRef.current?.downloadImage();
+    canvasRef.current?.downloadImage(pages);
   };
 
   const handleReset = () => {
-    setText("");
+    setPages([INITIAL_TEXT]);
+    setCurrentPage(0);
     setFontFamily(fontOptions[0].value);
     setPaperType(paperOptions[0].value);
     setFontSize(42);
     setInkColor(inkColorOptions[0].value);
   }
+
+  const addPage = () => {
+    setPages([...pages, "<p>New page...</p>"]);
+    setCurrentPage(pages.length);
+  };
+
+  const goToPrevPage = () => {
+    if (currentPage > 0) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const goToNextPage = () => {
+    if (currentPage < pages.length - 1) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-dvh bg-gray-50">
@@ -124,10 +154,17 @@ export default function Home() {
           <div className="lg:col-span-1 space-y-6">
             <Card>
               <CardContent className="p-0">
-                <TextEditor value={text} onChange={setText} />
+                <TextEditor value={pages[currentPage]} onChange={handleTextChange} />
               </CardContent>
             </Card>
             
+            <div className="flex items-center justify-center gap-4">
+              <Button onClick={goToPrevPage} disabled={currentPage === 0} variant="outline" size="icon"><ChevronLeft/></Button>
+              <span className="text-sm font-medium">Page {currentPage + 1} of {pages.length}</span>
+              <Button onClick={goToNextPage} disabled={currentPage === pages.length - 1} variant="outline" size="icon"><ChevronRight/></Button>
+              <Button onClick={addPage} variant="outline"><Plus className="mr-2"/> Add Page</Button>
+            </div>
+
             <div className="space-y-4">
                 <h2 className="text-lg font-semibold flex items-center gap-2"><Pilcrow/> Manuscript options</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -208,7 +245,7 @@ export default function Home() {
           </div>
           <div className="lg:col-span-2">
             <div className="bg-white p-4 rounded-lg shadow-md h-full">
-              <ScribbleCraftCanvas ref={canvasRef} text={text} fontFamily={fontFamily} paperType={paperType} fontSize={fontSize} inkColor={inkColor} />
+              <ScribbleCraftCanvas ref={canvasRef} text={pages[currentPage]} fontFamily={fontFamily} paperType={paperType} fontSize={fontSize} inkColor={inkColor} />
             </div>
           </div>
         </div>
