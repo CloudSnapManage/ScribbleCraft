@@ -1,6 +1,6 @@
 
 "use client";
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { Bold, Italic, Underline, List, ListOrdered, Heading1, Heading2, Heading3 } from 'lucide-react';
 
 interface TextEditorProps {
@@ -21,10 +21,12 @@ const ToolbarButton = ({ icon: Icon, onClick, active = false }: { icon: React.El
 
 const TextEditor: React.FC<TextEditorProps> = ({ value, onChange }) => {
     const editorRef = useRef<HTMLDivElement>(null);
+    const [activeButtons, setActiveButtons] = useState<{[key: string]: boolean}>({});
 
     const handleInput = () => {
         if (editorRef.current) {
             onChange(editorRef.current.innerHTML);
+            updateActiveButtons();
         }
     };
 
@@ -41,31 +43,65 @@ const TextEditor: React.FC<TextEditorProps> = ({ value, onChange }) => {
         return false;
     }
 
+    const updateActiveButtons = () => {
+        setActiveButtons({
+            h1: document.queryCommandValue('formatBlock') === 'h1',
+            h2: document.queryCommandValue('formatBlock') === 'h2',
+            h3: document.queryCommandValue('formatBlock') === 'h3',
+            bold: queryCommandState('bold'),
+            italic: queryCommandState('italic'),
+            underline: queryCommandState('underline'),
+            insertUnorderedList: queryCommandState('insertUnorderedList'),
+            insertOrderedList: queryCommandState('insertOrderedList'),
+        });
+    }
+
     // Set initial content
     useEffect(() => {
         if (editorRef.current && value !== editorRef.current.innerHTML) {
             editorRef.current.innerHTML = value;
         }
     }, [value]);
+
+    useEffect(() => {
+        const editor = editorRef.current;
+        const handleSelectionChange = () => {
+            if (document.activeElement === editor) {
+                updateActiveButtons();
+            }
+        };
+
+        document.addEventListener('selectionchange', handleSelectionChange);
+        editor?.addEventListener('focus', updateActiveButtons);
+        editor?.addEventListener('click', updateActiveButtons);
+        editor?.addEventListener('keyup', updateActiveButtons);
+
+
+        return () => {
+            document.removeEventListener('selectionchange', handleSelectionChange);
+            editor?.removeEventListener('focus', updateActiveButtons);
+            editor?.removeEventListener('click', updateActiveButtons);
+            editor?.removeEventListener('keyup', updateActiveButtons);
+        };
+    }, []);
     
     return (
         <div className="border rounded-lg">
             <div className="toolbar flex items-center gap-1 p-2 border-b bg-card">
-                <ToolbarButton icon={Heading1} onClick={() => execCommand('formatBlock', '<h1>')} active={queryCommandState('formatBlock')} />
-                <ToolbarButton icon={Heading2} onClick={() => execCommand('formatBlock', '<h2>')} active={queryCommandState('formatBlock')} />
-                <ToolbarButton icon={Heading3} onClick={() => execCommand('formatBlock', '<h3>')} active={queryCommandState('formatBlock')} />
-                <ToolbarButton icon={Bold} onClick={() => execCommand('bold')} active={queryCommandState('bold')} />
-                <ToolbarButton icon={Italic} onClick={() => execCommand('italic')} active={queryCommandState('italic')} />
-                <ToolbarButton icon={Underline} onClick={() => execCommand('underline')} active={queryCommandState('underline')} />
-                <ToolbarButton icon={List} onClick={() => execCommand('insertUnorderedList')} active={queryCommandState('insertUnorderedList')} />
-                <ToolbarButton icon={ListOrdered} onClick={() => execCommand('insertOrderedList')} active={queryCommandState('insertOrderedList')} />
+                <ToolbarButton icon={Heading1} onClick={() => execCommand('formatBlock', '<h1>')} active={activeButtons['h1']} />
+                <ToolbarButton icon={Heading2} onClick={() => execCommand('formatBlock', '<h2>')} active={activeButtons['h2']} />
+                <ToolbarButton icon={Heading3} onClick={() => execCommand('formatBlock', '<h3>')} active={activeButtons['h3']} />
+                <ToolbarButton icon={Bold} onClick={() => execCommand('bold')} active={activeButtons['bold']} />
+                <ToolbarButton icon={Italic} onClick={() => execCommand('italic')} active={activeButtons['italic']} />
+                <ToolbarButton icon={Underline} onClick={() => execCommand('underline')} active={activeButtons['underline']} />
+                <ToolbarButton icon={List} onClick={() => execCommand('insertUnorderedList')} active={activeButtons['insertUnorderedList']} />
+                <ToolbarButton icon={ListOrdered} onClick={() => execCommand('insertOrderedList')} active={activeButtons['insertOrderedList']} />
             </div>
             <div
                 ref={editorRef}
                 contentEditable
                 onInput={handleInput}
                 className="p-4 min-h-[250px] outline-none focus:ring-0 bg-card"
-                dangerouslySetInnerHTML={{ __html: value }}
             />
         </div>
     );

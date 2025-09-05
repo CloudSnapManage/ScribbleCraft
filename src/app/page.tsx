@@ -124,7 +124,7 @@ export default function Home() {
   }
 
   const handleReset = () => {
-    setPages([""]);
+    setPages([INITIAL_TEXT]);
     setCurrentPage(0);
     setFontFamily(fontOptions[0].value);
     setPaperType(paperOptions[0].value);
