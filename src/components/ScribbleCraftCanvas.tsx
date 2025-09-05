@@ -7,14 +7,14 @@ interface ScribbleCraftCanvasProps {
   text: string;
   fontFamily: string;
   paperType: string;
+  fontSize: number;
 }
 
 const ScribbleCraftCanvas = forwardRef<{ downloadImage: () => void }, ScribbleCraftCanvasProps>(
-  ({ text, fontFamily, paperType }, ref) => {
+  ({ text, fontFamily, paperType, fontSize }, ref) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
-    const FONT_SIZE = 42;
-    const LINE_HEIGHT = FONT_SIZE * 1.5;
+    
     const PADDING = 40;
 
     useImperativeHandle(ref, () => ({
@@ -38,6 +38,9 @@ const ScribbleCraftCanvas = forwardRef<{ downloadImage: () => void }, ScribbleCr
 
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
+      
+      const FONT_SIZE = fontSize;
+      const LINE_HEIGHT = FONT_SIZE * 1.5;
 
       const draw = () => {
         const { width } = container.getBoundingClientRect();
@@ -395,7 +398,7 @@ const ScribbleCraftCanvas = forwardRef<{ downloadImage: () => void }, ScribbleCr
       draw();
 
       return () => resizeObserver.unobserve(container);
-    }, [text, fontFamily, paperType]);
+    }, [text, fontFamily, paperType, fontSize]);
 
     return (
       <div ref={containerRef} className="w-full h-full min-h-[500px] bg-white rounded-md overflow-hidden">
