@@ -15,7 +15,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Input } from "@/components/ui/input";
 import { Download, Trash2, GraduationCap } from "lucide-react";
 
 import ScribbleCraftCanvas from "@/components/ScribbleCraftCanvas";
@@ -75,11 +74,21 @@ const paperOptions = [
     { value: "watercolor-paper", label: "Watercolor Paper" },
 ]
 
+const inkColorOptions = [
+    { value: "#3a3a3a", label: "Light Black" },
+    { value: "#0000FF", label: "Blue" },
+    { value: "#FF0000", label: "Red" },
+    { value: "#008000", label: "Green" },
+    { value: "#800080", label: "Purple" },
+    { value: "#A52A2A", label: "Brown" },
+]
+
 export default function Home() {
   const [text, setText] = useState(INITIAL_TEXT);
   const [fontFamily, setFontFamily] = useState(fontOptions[0].value);
   const [paperType, setPaperType] = useState(paperOptions[0].value);
   const [fontSize, setFontSize] = useState(42);
+  const [inkColor, setInkColor] = useState(inkColorOptions[0].value);
   const canvasRef = useRef<CanvasHandle>(null);
 
   const handleDownload = () => {
@@ -91,6 +100,7 @@ export default function Home() {
     setFontFamily(fontOptions[0].value);
     setPaperType(paperOptions[0].value);
     setFontSize(42);
+    setInkColor(inkColorOptions[0].value);
   }
 
   return (
@@ -149,20 +159,22 @@ export default function Home() {
                         ))}
                     </SelectContent>
                 </Select>
-                <Select>
+                <Select value={inkColor} onValueChange={setInkColor}>
                   <SelectTrigger>
                     <div className="flex items-center">
-                      <div className="w-5 h-5 rounded-full mr-2" style={{backgroundColor: '#3a3a3a'}}></div>
+                      <div className="w-5 h-5 rounded-full mr-2" style={{backgroundColor: inkColor}}></div>
                       <SelectValue placeholder="Ink Color" />
                     </div>
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="light-black">
-                        <div className="flex items-center">
-                          <div className="w-5 h-5 rounded-full mr-2" style={{backgroundColor: '#3a3a3a'}}></div>
-                          Light Black
-                        </div>
-                    </SelectItem>
+                    {inkColorOptions.map(color => (
+                        <SelectItem key={color.value} value={color.value}>
+                            <div className="flex items-center">
+                              <div className="w-5 h-5 rounded-full mr-2" style={{backgroundColor: color.value}}></div>
+                              {color.label}
+                            </div>
+                        </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -188,7 +200,7 @@ export default function Home() {
           </div>
           <div className="lg:col-span-2">
             <div className="bg-white p-4 rounded-lg shadow-md h-full">
-              <ScribbleCraftCanvas ref={canvasRef} text={text} fontFamily={fontFamily} paperType={paperType} fontSize={fontSize} />
+              <ScribbleCraftCanvas ref={canvasRef} text={text} fontFamily={fontFamily} paperType={paperType} fontSize={fontSize} inkColor={inkColor} />
             </div>
           </div>
         </div>

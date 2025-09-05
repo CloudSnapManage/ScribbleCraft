@@ -8,10 +8,11 @@ interface ScribbleCraftCanvasProps {
   fontFamily: string;
   paperType: string;
   fontSize: number;
+  inkColor: string;
 }
 
 const ScribbleCraftCanvas = forwardRef<{ downloadImage: () => void }, ScribbleCraftCanvasProps>(
-  ({ text, fontFamily, paperType, fontSize }, ref) => {
+  ({ text, fontFamily, paperType, fontSize, inkColor }, ref) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     
@@ -104,7 +105,7 @@ const ScribbleCraftCanvas = forwardRef<{ downloadImage: () => void }, ScribbleCr
         }
 
 
-        ctx.fillStyle = paperType === 'blackboard' || paperType === 'blueprint' ? '#FFFFFF' : '#1a1a1a';
+        ctx.fillStyle = paperType === 'blackboard' || paperType === 'blueprint' ? '#FFFFFF' : inkColor;
         ctx.font = `${FONT_SIZE}px ${fontFamily}`;
         ctx.textBaseline = "top";
 
@@ -398,7 +399,7 @@ const ScribbleCraftCanvas = forwardRef<{ downloadImage: () => void }, ScribbleCr
       draw();
 
       return () => resizeObserver.unobserve(container);
-    }, [text, fontFamily, paperType, fontSize]);
+    }, [text, fontFamily, paperType, fontSize, inkColor]);
 
     return (
       <div ref={containerRef} className="w-full h-full min-h-[500px] bg-white rounded-md overflow-hidden">
