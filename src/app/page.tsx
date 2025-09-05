@@ -8,19 +8,26 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Download, Trash2, GraduationCap, Pilcrow, Type, Palette, Baseline, Plus, ChevronLeft, ChevronRight } from "lucide-react";
+import { Download, Trash2, GraduationCap, Pilcrow, Type, Palette, Baseline, Plus, ChevronLeft, ChevronRight, FileImage, FileText } from "lucide-react";
 
 import ScribbleCraftCanvas from "@/components/ScribbleCraftCanvas";
 import TextEditor from "@/components/TextEditor";
 
 type CanvasHandle = {
   downloadImage: (pages: string[]) => void;
+  downloadPdf: (pages: string[]) => void;
 };
 
 const INITIAL_TEXT = "<p>Start typing...</p>";
@@ -107,12 +114,16 @@ export default function Home() {
     setPages(newPages);
   };
 
-  const handleDownload = () => {
+  const handleDownloadImage = () => {
     canvasRef.current?.downloadImage(pages);
   };
+  
+  const handleDownloadPdf = () => {
+    canvasRef.current?.downloadPdf(pages);
+  }
 
   const handleReset = () => {
-    setPages([INITIAL_TEXT]);
+    setPages(["<p></p>"]);
     setCurrentPage(0);
     setFontFamily(fontOptions[0].value);
     setPaperType(paperOptions[0].value);
@@ -237,10 +248,24 @@ export default function Home() {
             </div>
             
              <div className="flex justify-end items-center">
-              <Button onClick={handleDownload} size="lg">
-                <Download className="mr-2"/>
-                Export Handwriting
-              </Button>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button size="lg">
+                        <Download className="mr-2"/>
+                        Export Handwriting
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem onClick={handleDownloadImage}>
+                        <FileImage className="mr-2 h-4 w-4" />
+                        <span>Export as PNG</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={handleDownloadPdf}>
+                         <FileText className="mr-2 h-4 w-4" />
+                        <span>Export as PDF</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </div>
           </div>
           <div className="lg:col-span-2">

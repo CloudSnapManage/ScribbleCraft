@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useRef, forwardRef, useImperativeHandle } from "react";
+import jsPDF from "jspdf";
 
 interface ScribbleCraftCanvasProps {
   text: string;
@@ -11,7 +12,7 @@ interface ScribbleCraftCanvasProps {
   inkColor: string;
 }
 
-const ScribbleCraftCanvas = forwardRef<{ downloadImage: (pages: string[]) => void }, ScribbleCraftCanvasProps>(
+const ScribbleCraftCanvas = forwardRef<{ downloadImage: (pages: string[]) => void; downloadPdf: (pages: string[]) => void }, ScribbleCraftCanvasProps>(
   ({ text, fontFamily, paperType, fontSize, inkColor }, ref) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -244,10 +245,9 @@ const ScribbleCraftCanvas = forwardRef<{ downloadImage: (pages: string[]) => voi
       return y + fontSize * 1.5 + PADDING; 
     };
 
-    useImperativeHandle(ref, () => ({
-      downloadImage: async (pages) => {
+    const getPageCanvases = async (pages: string[]) => {
         const container = containerRef.current;
-        if (!container) return;
+        if (!container) return [];
 
         const { width } = container.getBoundingClientRect();
         const dpr = window.devicePixelRatio || 1;
@@ -271,13 +271,19 @@ const ScribbleCraftCanvas = forwardRef<{ downloadImage: (pages: string[]) => voi
           })
         );
         
-        const validCanvases = pageCanvases.filter(c => c !== null) as HTMLCanvasElement[];
+        return pageCanvases.filter(c => c !== null) as HTMLCanvasElement[];
+    }
+
+    useImperativeHandle(ref, () => ({
+      downloadImage: async (pages) => {
+        const validCanvases = await getPageCanvases(pages);
         if (validCanvases.length === 0) return;
 
         const totalHeight = validCanvases.reduce((sum, canvas) => sum + canvas.height, 0);
+        const canvasWidth = validCanvases[0].width;
         
         const stitchedCanvas = document.createElement('canvas');
-        stitchedCanvas.width = canvasWidth * dpr;
+        stitchedCanvas.width = canvasWidth;
         stitchedCanvas.height = totalHeight;
         const stitchedCtx = stitchedCanvas.getContext('2d');
         if (!stitchedCtx) return;
@@ -295,6 +301,33 @@ const ScribbleCraftCanvas = forwardRef<{ downloadImage: (pages: string[]) => voi
         link.click();
         document.body.removeChild(link);
       },
+      downloadPdf: async (pages) => {
+        const validCanvases = await getPageCanvases(pages);
+        if (validCanvases.length === 0) return;
+
+        const dpr = window.devicePixelRatio || 1;
+        // Use the dimensions from the first canvas for the PDF page size
+        const pdfWidth = validCanvases[0].width / dpr;
+        const pdfHeight = validCanvases[0].height / dpr;
+        
+        const pdf = new jsPDF({
+            orientation: pdfWidth > pdfHeight ? 'landscape' : 'portrait',
+            unit: 'px',
+            format: [pdfWidth, pdfHeight]
+        });
+
+        for (let i = 0; i < validCanvases.length; i++) {
+            const canvas = validCanvases[i];
+            const imgData = canvas.toDataURL('image/png');
+            
+            if (i > 0) {
+                pdf.addPage([pdfWidth, pdfHeight], pdfWidth > pdfHeight ? 'landscape' : 'portrait');
+            }
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        }
+
+        pdf.save('scribblecraft.pdf');
+      }
     }));
 
     useEffect(() => {
