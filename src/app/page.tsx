@@ -24,6 +24,7 @@ import { Download, Trash2, GraduationCap, Pilcrow, Type, Palette, Baseline, Plus
 
 import ScribbleCraftCanvas from "@/components/ScribbleCraftCanvas";
 import TextEditor from "@/components/TextEditor";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 type CanvasHandle = {
   downloadImage: (pages: string[]) => void;
@@ -123,7 +124,7 @@ export default function Home() {
   }
 
   const handleReset = () => {
-    setPages(["<p></p>"]);
+    setPages([""]);
     setCurrentPage(0);
     setFontFamily(fontOptions[0].value);
     setPaperType(paperOptions[0].value);
@@ -149,14 +150,15 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col min-h-dvh bg-gray-50">
+    <div className="flex flex-col min-h-dvh">
       <header className="container mx-auto px-4 py-4 flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold tracking-tight" style={{fontFamily: "'Shadows Into Light', cursive"}}>ScribbleCraft</h1>
           <p className="text-muted-foreground">Turn your typed text into beautiful handwriting.</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
             <Button variant="outline" onClick={handleReset}><Trash2 className="mr-2"/>Reset All</Button>
+            <ThemeToggle />
         </div>
 
       </header>
@@ -182,7 +184,7 @@ export default function Home() {
                     <Select value={fontFamily} onValueChange={setFontFamily}>
                         <SelectTrigger>
                              <div className="flex items-center gap-2">
-                                <Type className="text-gray-500"/>
+                                <Type className="text-muted-foreground"/>
                                 <SelectValue placeholder="Font Family" />
                             </div>
                         </SelectTrigger>
@@ -196,7 +198,7 @@ export default function Home() {
                     <Select value={paperType} onValueChange={setPaperType}>
                         <SelectTrigger>
                             <div className="flex items-center gap-2">
-                                <GraduationCap className="text-gray-500"/>
+                                <GraduationCap className="text-muted-foreground"/>
                                 <SelectValue placeholder="Paper Type" />
                             </div>
                         </SelectTrigger>
@@ -212,7 +214,7 @@ export default function Home() {
                 <Select value={String(fontSize)} onValueChange={(value) => setFontSize(Number(value))}>
                     <SelectTrigger>
                         <div className="flex items-center gap-2">
-                            <Baseline className="text-gray-500"/>
+                            <Baseline className="text-muted-foreground"/>
                             <SelectValue placeholder="Font Size" />
                         </div>
                     </SelectTrigger>
@@ -225,7 +227,7 @@ export default function Home() {
                 <Select value={inkColor} onValueChange={setInkColor}>
                   <SelectTrigger>
                     <div className="flex items-center gap-2">
-                        <Palette className="text-gray-500"/>
+                        <Palette className="text-muted-foreground"/>
                         <div className="flex items-center gap-2">
                             <div className="w-4 h-4 rounded-full border" style={{backgroundColor: inkColor}}></div>
                             <span>{inkColorOptions.find(c => c.value === inkColor)?.label}</span>
@@ -269,9 +271,11 @@ export default function Home() {
             </div>
           </div>
           <div className="lg:col-span-2">
-            <div className="bg-white p-4 rounded-lg shadow-md h-full">
-              <ScribbleCraftCanvas ref={canvasRef} text={pages[currentPage]} fontFamily={fontFamily} paperType={paperType} fontSize={fontSize} inkColor={inkColor} />
-            </div>
+            <Card>
+              <CardContent className="p-4">
+                <ScribbleCraftCanvas ref={canvasRef} text={pages[currentPage]} fontFamily={fontFamily} paperType={paperType} fontSize={fontSize} inkColor={inkColor} />
+              </CardContent>
+            </Card>
           </div>
         </div>
       </main>

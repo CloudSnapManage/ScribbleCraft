@@ -12,7 +12,7 @@ const ToolbarButton = ({ icon: Icon, onClick, active = false }: { icon: React.El
     <button
         onClick={onClick}
         onMouseDown={e => e.preventDefault()}
-        className={`p-2 rounded-md hover:bg-gray-200 ${active ? 'bg-gray-300' : ''}`}
+        className={`p-2 rounded-md hover:bg-accent ${active ? 'bg-muted' : ''}`}
     >
         <Icon className="h-5 w-5" />
     </button>
@@ -50,7 +50,7 @@ const TextEditor: React.FC<TextEditorProps> = ({ value, onChange }) => {
     
     return (
         <div className="border rounded-lg">
-            <div className="toolbar flex items-center gap-1 p-2 border-b">
+            <div className="toolbar flex items-center gap-1 p-2 border-b bg-card">
                 <ToolbarButton icon={Heading1} onClick={() => execCommand('formatBlock', '<h1>')} active={queryCommandState('formatBlock')} />
                 <ToolbarButton icon={Heading2} onClick={() => execCommand('formatBlock', '<h2>')} active={queryCommandState('formatBlock')} />
                 <ToolbarButton icon={Heading3} onClick={() => execCommand('formatBlock', '<h3>')} active={queryCommandState('formatBlock')} />
@@ -64,7 +64,7 @@ const TextEditor: React.FC<TextEditorProps> = ({ value, onChange }) => {
                 ref={editorRef}
                 contentEditable
                 onInput={handleInput}
-                className="p-4 min-h-[250px] outline-none focus:ring-0"
+                className="p-4 min-h-[250px] outline-none focus:ring-0 bg-card"
                 dangerouslySetInnerHTML={{ __html: value }}
             />
         </div>

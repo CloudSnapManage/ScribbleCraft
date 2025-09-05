@@ -3,6 +3,7 @@
 
 import { useEffect, useRef, forwardRef, useImperativeHandle } from "react";
 import jsPDF from "jspdf";
+import { useTheme } from "next-themes";
 
 interface ScribbleCraftCanvasProps {
   text: string;
@@ -16,6 +17,7 @@ const ScribbleCraftCanvas = forwardRef<{ downloadImage: (pages: string[]) => voi
   ({ text, fontFamily, paperType, fontSize, inkColor }, ref) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    const { theme } = useTheme();
     
     const PADDING = 40;
 
@@ -39,7 +41,19 @@ const ScribbleCraftCanvas = forwardRef<{ downloadImage: (pages: string[]) => voi
               default: drawWhitePaper(ctx, width, height); break;
             }
 
-            ctx.fillStyle = paperType === 'blackboard' || paperType === 'blueprint' ? '#FFFFFF' : inkColor;
+            if (theme === 'dark' && paperType === 'white-paper') {
+              ctx.fillStyle = '#111827';
+              ctx.fillRect(0, 0, width, height);
+            }
+
+            let effectiveInkColor = inkColor;
+            if (theme === 'dark' && paperType === 'white-paper') {
+              effectiveInkColor = '#FFFFFF';
+            } else if (paperType === 'blackboard' || paperType === 'blueprint') {
+              effectiveInkColor = '#FFFFFF';
+            }
+            ctx.fillStyle = effectiveInkColor;
+            
             ctx.textBaseline = "top";
             
             const parser = new DOMParser();
@@ -366,7 +380,7 @@ const ScribbleCraftCanvas = forwardRef<{ downloadImage: (pages: string[]) => voi
             resizeObserver.unobserve(container)
         }
       };
-    }, [text, fontFamily, paperType, fontSize, inkColor]);
+    }, [text, fontFamily, paperType, fontSize, inkColor, theme]);
     
       
       const drawWhitePaper = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
@@ -382,10 +396,10 @@ const ScribbleCraftCanvas = forwardRef<{ downloadImage: (pages: string[]) => voi
       }
 
       const drawNotebookPaper = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-        ctx.fillStyle = "#fff";
+        ctx.fillStyle = theme === 'dark' ? '#1f2937' : '#fff';
         ctx.fillRect(0, 0, width, height);
 
-        ctx.strokeStyle = "rgba(173, 216, 230, 0.5)";
+        ctx.strokeStyle = theme === 'dark' ? "rgba(107, 114, 128, 0.5)" :"rgba(173, 216, 230, 0.5)";
         ctx.lineWidth = 1;
         const lineHeight = fontSize * 1.5;
         for (let y = PADDING; y < height; y += lineHeight) {
@@ -395,7 +409,7 @@ const ScribbleCraftCanvas = forwardRef<{ downloadImage: (pages: string[]) => voi
             ctx.stroke();
         }
 
-        ctx.strokeStyle = "rgba(255, 182, 193, 0.8)";
+        ctx.strokeStyle = theme === 'dark' ? "rgba(252, 165, 165, 0.8)" : "rgba(255, 182, 193, 0.8)";
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.moveTo(PADDING * 1.5, 0);
@@ -404,23 +418,23 @@ const ScribbleCraftCanvas = forwardRef<{ downloadImage: (pages: string[]) => voi
       }
       
       const drawDiaryPage = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-        ctx.fillStyle = "#f3f0e8";
+        ctx.fillStyle = theme === 'dark' ? '#2c2a24' : "#f3f0e8";
         ctx.fillRect(0, 0, width, height);
 
         for (let i = 0; i < 5000; i++) {
             const x = Math.random() * width;
             const y = Math.random() * height;
             const alpha = Math.random() * 0.05;
-            ctx.fillStyle = `rgba(0,0,0,${alpha})`;
+            ctx.fillStyle = `rgba(255,255,255,${alpha})`;
             ctx.fillRect(x, y, 2, 2);
         }
-        ctx.strokeStyle = "#e0d8c6";
+        ctx.strokeStyle = theme === 'dark' ? '#444036' : "#e0d8c6";
         ctx.lineWidth = 15;
         ctx.strokeRect(7.5, 7.5, width - 15, height - 15);
       }
       
       const drawOldPaper = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-        ctx.fillStyle = "#f5e8c8";
+        ctx.fillStyle = theme === 'dark' ? '#3d372a' : "#f5e8c8";
         ctx.fillRect(0, 0, width, height);
 
         for (let i = 0; i < 20; i++) {
@@ -428,17 +442,17 @@ const ScribbleCraftCanvas = forwardRef<{ downloadImage: (pages: string[]) => voi
             const y = Math.random() * height;
             const radius = Math.random() * 50 + 20;
             const grd = ctx.createRadialGradient(x, y, 0, x, y, radius);
-            grd.addColorStop(0, "rgba(165, 42, 42, 0.05)");
-            grd.addColorStop(1, "rgba(165, 42, 42, 0)");
+            grd.addColorStop(0, "rgba(255, 255, 255, 0.03)");
+            grd.addColorStop(1, "rgba(255, 255, 255, 0)");
             ctx.fillStyle = grd;
             ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
         }
       }
 
       const drawGraphPaper = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-        ctx.fillStyle = "#ffffff";
+        ctx.fillStyle = theme === 'dark' ? '#111827' : '#ffffff';
         ctx.fillRect(0, 0, width, height);
-        ctx.strokeStyle = "rgba(0, 100, 255, 0.2)";
+        ctx.strokeStyle = theme === 'dark' ? "rgba(100, 150, 255, 0.2)" : "rgba(0, 100, 255, 0.2)";
         ctx.lineWidth = 0.5;
         const gridSize = 20;
         for (let x = 0; x < width; x += gridSize) {
@@ -485,7 +499,7 @@ const ScribbleCraftCanvas = forwardRef<{ downloadImage: (pages: string[]) => voi
       }
 
       const drawCorkboard = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-        ctx.fillStyle = "#d2b48c";
+        ctx.fillStyle = theme === 'dark' ? '#5f4a33' : '#d2b48c';
         ctx.fillRect(0, 0, width, height);
         for (let i = 0; i < 20000; i++) {
             const x = Math.random() * width;
@@ -499,19 +513,19 @@ const ScribbleCraftCanvas = forwardRef<{ downloadImage: (pages: string[]) => voi
       }
 
       const drawParchment = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-        ctx.fillStyle = "#f5eecf";
+        ctx.fillStyle = theme === 'dark' ? '#4a463a' : "#f5eecf";
         ctx.fillRect(0, 0, width, height);
         const gradient = ctx.createRadialGradient(width / 2, height / 2, 0, width / 2, height / 2, Math.max(width, height));
-        gradient.addColorStop(0, "rgba(210, 180, 140, 0)");
-        gradient.addColorStop(1, "rgba(210, 180, 140, 0.3)");
+        gradient.addColorStop(0, "rgba(255, 255, 255, 0)");
+        gradient.addColorStop(1, "rgba(255, 255, 255, 0.1)");
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, width, height);
       }
 
       const drawLegalPad = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-        ctx.fillStyle = "#fffacd";
+        ctx.fillStyle = theme === 'dark' ? '#444428' : "#fffacd";
         ctx.fillRect(0, 0, width, height);
-        ctx.strokeStyle = "rgba(173, 216, 230, 0.7)";
+        ctx.strokeStyle = theme === 'dark' ? "rgba(107, 114, 128, 0.7)" : "rgba(173, 216, 230, 0.7)";
         ctx.lineWidth = 1;
         const lineHeight = fontSize * 1.5;
         for (let y = PADDING; y < height; y += lineHeight) {
@@ -520,7 +534,7 @@ const ScribbleCraftCanvas = forwardRef<{ downloadImage: (pages: string[]) => voi
             ctx.lineTo(width, y);
             ctx.stroke();
         }
-        ctx.strokeStyle = "#ff6347";
+        ctx.strokeStyle = theme === 'dark' ? '#b91c1c' : "#ff6347";
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.moveTo(PADDING, 0);
@@ -533,9 +547,9 @@ const ScribbleCraftCanvas = forwardRef<{ downloadImage: (pages: string[]) => voi
       }
 
       const drawDottedGrid = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-        ctx.fillStyle = "#f9f9f9";
+        ctx.fillStyle = theme === 'dark' ? '#1f2937' : '#f9f9f9';
         ctx.fillRect(0, 0, width, height);
-        ctx.fillStyle = "#cccccc";
+        ctx.fillStyle = theme === 'dark' ? '#6b7280' : "#cccccc";
         const dotSize = 2;
         const gridSize = 25;
         for (let x = PADDING; x < width - PADDING; x += gridSize) {
@@ -562,7 +576,7 @@ const ScribbleCraftCanvas = forwardRef<{ downloadImage: (pages: string[]) => voi
       }
       
       const drawPapyrus = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-        ctx.fillStyle = "#e6d8b5";
+        ctx.fillStyle = theme === 'dark' ? '#4a412a' : "#e6d8b5";
         ctx.fillRect(0, 0, width, height);
         ctx.lineWidth = 1;
         for(let i = 0; i < width; i+=4) {
@@ -582,7 +596,7 @@ const ScribbleCraftCanvas = forwardRef<{ downloadImage: (pages: string[]) => voi
       }
 
       const drawLinenPaper = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-          ctx.fillStyle = "#faf0e6";
+          ctx.fillStyle = theme === 'dark' ? '#3c3631' : "#faf0e6";
           ctx.fillRect(0, 0, width, height);
           ctx.lineWidth = 0.5;
           ctx.strokeStyle = "rgba(0, 0, 0, 0.05)";
@@ -601,7 +615,7 @@ const ScribbleCraftCanvas = forwardRef<{ downloadImage: (pages: string[]) => voi
       }
 
       const drawWatercolorPaper = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-          ctx.fillStyle = "#f8f8f0";
+          ctx.fillStyle = theme === 'dark' ? '#3c3c38' : "#f8f8f0";
           ctx.fillRect(0, 0, width, height);
           for (let i = 0; i < 30000; i++) {
               ctx.fillStyle = `rgba(0, 0, 0, ${Math.random() * 0.02})`;
@@ -612,14 +626,14 @@ const ScribbleCraftCanvas = forwardRef<{ downloadImage: (pages: string[]) => voi
           }
           const gradient = ctx.createRadialGradient(width / 2, height / 2, 0, width / 2, height / 2, width);
           gradient.addColorStop(0, "rgba(255, 255, 255, 0)");
-          gradient.addColorStop(1, "rgba(220, 220, 220, 0.1)");
+          gradient.addColorStop(1, "rgba(0, 0, 0, 0.1)");
           ctx.fillStyle = gradient;
           ctx.fillRect(0, 0, width, height);
       }
 
 
     return (
-      <div ref={containerRef} className="w-full h-full min-h-[500px] bg-white rounded-md overflow-hidden">
+      <div ref={containerRef} className="w-full h-full min-h-[500px] overflow-hidden">
         <canvas ref={canvasRef} />
       </div>
     );
